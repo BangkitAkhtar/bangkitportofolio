@@ -112,9 +112,25 @@ const LangContext = createContext<LangContextType>({
 });
 
 export function LangProvider({ children }: { children: ReactNode }) {
-  const [lang, setLang] = useState<Lang>("id");
+  // Ambil bahasa dari localStorage jika ada, jika tidak default ke "id"
+  const [lang, setLang] = useState<Lang>(() => {
+    if (typeof window !== "undefined") {
+      const savedLang = localStorage.getItem("ui_language") as Lang;
+      if (savedLang === "en" || savedLang === "id") return savedLang;
+    }
+    return "id";
+  });
+
+  // Fungsi khusus untuk set bahasa sekaligus menyimpan ke localStorage
+  const handleSetLang = (newLang: Lang) => {
+    setLang(newLang);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("ui_language", newLang);
+    }
+  };
+
   return (
-    <LangContext.Provider value={{ lang, setLang, t: translations[lang] }}>
+    <LangContext.Provider value={{ lang, setLang: handleSetLang, t: translations[lang] }}>
       {children}
     </LangContext.Provider>
   );

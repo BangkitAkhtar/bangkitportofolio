@@ -60,36 +60,54 @@ export function saveTranslations(translations: ContentTranslations): void {
   localStorage.setItem(TRANSLATIONS_KEY, JSON.stringify(translations));
 }
 
+// 🔥 INI ADALAH BAGIAN YANG SAYA PERBAIKI 🔥
 export function translateData(data: PortfolioData, lang: "en" | "id"): PortfolioData {
   if (lang === "en") return data;
 
-  const t = getTranslations();
+  // Prioritaskan mengambil dari data.translations (API) 
+  // Jika API kosong, fallback ke getTranslations() lokal agar tidak error
+  const apiTranslations = data.translations && Object.keys(data.translations).length > 0 
+    ? data.translations 
+    : getTranslations();
+
+  // Gabungkan dengan defaultTranslations agar struktur datanya terjamin aman
+  const t: ContentTranslations = {
+    ...defaultTranslations,
+    ...apiTranslations,
+    profile: { ...defaultTranslations.profile, ...(apiTranslations.profile || {}) },
+    experiences: { ...defaultTranslations.experiences, ...(apiTranslations.experiences || {}) },
+    projects: { ...defaultTranslations.projects, ...(apiTranslations.projects || {}) },
+    volunteers: { ...defaultTranslations.volunteers, ...(apiTranslations.volunteers || {}) },
+    awards: { ...defaultTranslations.awards, ...(apiTranslations.awards || {}) },
+    languages: { ...defaultTranslations.languages, ...(apiTranslations.languages || {}) },
+  };
+
   return {
     ...data,
     profile: {
       ...data.profile,
-      headline: t.profile.headline || data.profile.headline,
-      about: t.profile.about || data.profile.about,
+      headline: t.profile?.headline || data.profile.headline,
+      about: t.profile?.about || data.profile.about,
     },
     experiences: data.experiences.map((exp) => {
-      const tr = t.experiences[exp.id];
-      return tr ? { ...exp, description: tr.description } : exp;
+      const tr = t.experiences?.[exp.id];
+      return tr ? { ...exp, description: tr.description || exp.description } : exp;
     }),
     projects: data.projects.map((proj) => {
-      const tr = t.projects[proj.id];
-      return tr ? { ...proj, description: tr.description, role: tr.role } : proj;
+      const tr = t.projects?.[proj.id];
+      return tr ? { ...proj, description: tr.description || proj.description, role: tr.role || proj.role } : proj;
     }),
     volunteers: data.volunteers.map((vol) => {
-      const tr = t.volunteers[vol.id];
-      return tr ? { ...vol, description: tr.description } : vol;
+      const tr = t.volunteers?.[vol.id];
+      return tr ? { ...vol, description: tr.description || vol.description } : vol;
     }),
     awards: data.awards.map((award) => {
-      const tr = t.awards[award.id];
-      return tr ? { ...award, description: tr.description } : award;
+      const tr = t.awards?.[award.id];
+      return tr ? { ...award, description: tr.description || award.description } : award;
     }),
     languages: data.languages.map((lang) => {
-      const tr = t.languages[lang.name];
-      return tr ? { ...lang, level: tr.level } : lang;
+      const tr = t.languages?.[lang.name];
+      return tr ? { ...lang, level: tr.level || lang.level } : lang;
     }),
   };
 }
