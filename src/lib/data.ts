@@ -290,3 +290,15 @@ export async function saveData(data: PortfolioData): Promise<void> {
 export function resetData(): void {
   console.warn("Reset disabled in API mode.");
 }
+
+export interface Profile {
+  name: string;
+  headline: string;
+  headline_en?: string; // Tambahkan _en untuk bahasa Inggris
+  email: string;
+  linkedin: string;
+  cvLink: string;
+  image: string;
+  about: string;
+  about_en?: string;    // Tambahkan _en untuk bahasa Inggris
+}

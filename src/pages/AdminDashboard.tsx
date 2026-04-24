@@ -626,6 +626,11 @@ export default function AdminDashboard() {
     const fetchPortfolio = async () => {
       const portfolio = await getData();
       setData(portfolio);
+      
+      // 👇 TAMBAHAN BARU: Tarik translation dari DB dan pasang ke layar
+      if (portfolio.translations && Object.keys(portfolio.translations).length > 0) {
+        setTranslations(portfolio.translations);
+      }
     };
 
     fetchPortfolio();
@@ -639,15 +644,15 @@ export default function AdminDashboard() {
   const save = async () => {
     if (!data) return; // Guard
     try {
-      await saveData(data);
+      // 👇 TAMBAHAN BARU: Gabungkan translations ke dalam data utama
+      const finalDataToSave = {
+        ...data,
+        translations: translations
+      };
 
-      await fetch("https://api.bangkitakhtar.com/api/translations", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(translations),
-      });
+      // 👇 TAMBAHAN BARU: Simpan semuanya sekaligus lewat 1 pintu API portfolio
+      // (Kita menghapus fetch ke /translations karena route tersebut tidak ada di Laravel)
+      await saveData(finalDataToSave);
 
       toast({
         title: "Success",
