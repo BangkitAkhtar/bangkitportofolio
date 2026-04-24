@@ -90,22 +90,19 @@ export function DetailDialog({
       <AnimatePresence>
         {open && (
           <motion.div
-            key="main-modal-overlay"
+            key="main-modal"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
-            onClick={onClose}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-background/80 backdrop-blur-sm"
+            onClick={onClose} // Klik area kosong untuk menutup modal
           >
-            <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" />
-
             <motion.div
-              key="main-modal-content"
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              onClick={(e) => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()} // Mencegah klik di dalam kotak agar tidak tertutup
               className="relative z-10 bg-card rounded-2xl border shadow-2xl max-w-2xl w-full max-h-[85vh] flex flex-col overflow-hidden"
             >
               <button
@@ -165,98 +162,90 @@ export function DetailDialog({
       </AnimatePresence>
 
       {/* =======================================
-          2. ANIMASI LIGHTBOX (FOTO FULLSCREEN)
+          2. LIGHTBOX (FOTO FULLSCREEN)
           ======================================= */}
-      <AnimatePresence>
-        {lightboxIndex !== null && open && (
-          <motion.div
-            key="lightbox-overlay"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[60] flex flex-col items-center justify-center"
-            onClick={() => setLightboxIndex(null)}
+      {/* KUNCI PERBAIKAN: AnimatePresence dihapus agar elemen langsung lenyap dari DOM tanpa sisa */}
+      {lightboxIndex !== null && open && (
+        <div
+          className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black/95 backdrop-blur-md"
+          onClick={() => setLightboxIndex(null)}
+        >
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setLightboxIndex(null);
+            }}
+            className="absolute top-4 right-4 z-20 w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/20 transition-colors"
+            aria-label="Tutup Foto"
           >
-            <div className="absolute inset-0 bg-black/95 backdrop-blur-md" />
+            <X className="w-5 h-5" />
+          </button>
 
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setLightboxIndex(null);
-              }}
-              className="absolute top-4 right-4 z-20 w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/20 transition-colors"
-              aria-label="Tutup Foto"
-            >
-              <X className="w-5 h-5" />
-            </button>
+          <div className="absolute top-4 left-4 z-20 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md text-white text-sm font-medium">
+            {lightboxIndex + 1} / {images.length}
+          </div>
 
-            <div className="absolute top-4 left-4 z-20 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md text-white text-sm font-medium">
-              {lightboxIndex + 1} / {images.length}
-            </div>
-
-            {images.length > 1 && (
-              <>
-                <button
-                  onClick={lbPrev}
-                  className="hidden lg:flex absolute left-6 z-20 w-12 h-12 rounded-full bg-white/10 backdrop-blur-md items-center justify-center text-white hover:bg-white/20 transition-colors"
-                  aria-label="Gambar Sebelumnya"
-                >
-                  <ChevronLeft className="w-6 h-6" />
-                </button>
-                <button
-                  onClick={lbNext}
-                  className="hidden lg:flex absolute right-6 z-20 w-12 h-12 rounded-full bg-white/10 backdrop-blur-md items-center justify-center text-white hover:bg-white/20 transition-colors"
-                  aria-label="Gambar Selanjutnya"
-                >
-                  <ChevronRight className="w-6 h-6" />
-                </button>
-              </>
-            )}
-
-            <div
-               className="relative z-10 w-full h-full flex items-center justify-center p-4"
-               onClick={(e) => e.stopPropagation()}
-            >
-              <motion.img
-                key={lightboxIndex}
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.2 }}
-                // KUNCI PERBAIKAN: TANPA EXIT PROP AGAR DOM TIDAK STUCK SAAT GANTI GAMBAR!
-                src={images[lightboxIndex]}
-                alt={`${title} - gambar ${lightboxIndex + 1}`}
-                drag={images.length > 1 ? "x" : false}
-                dragConstraints={{ left: 0, right: 0 }}
-                dragElastic={0.3}
-                onDragEnd={handleDragEnd}
-                className="max-w-full max-h-[85vh] object-contain rounded-lg select-none cursor-grab active:cursor-grabbing shadow-2xl"
-                draggable={false}
-              />
-            </div>
-
-            {/* Tombol Kontrol Mobile */}
-            {images.length > 1 && (
-              <div
-                className="flex lg:hidden gap-8 absolute bottom-6 z-20"
-                onClick={(e) => e.stopPropagation()}
+          {images.length > 1 && (
+            <>
+              <button
+                onClick={lbPrev}
+                className="hidden lg:flex absolute left-6 z-20 w-12 h-12 rounded-full bg-white/10 backdrop-blur-md items-center justify-center text-white hover:bg-white/20 transition-colors"
+                aria-label="Gambar Sebelumnya"
               >
-                <button
-                  onClick={lbPrev}
-                  className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/20 transition-colors"
-                >
-                  <ChevronLeft className="w-6 h-6" />
-                </button>
-                <button
-                  onClick={lbNext}
-                  className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/20 transition-colors"
-                >
-                  <ChevronRight className="w-6 h-6" />
-                </button>
-              </div>
-            )}
-          </motion.div>
-        )}
-      </AnimatePresence>
+                <ChevronLeft className="w-6 h-6" />
+              </button>
+              <button
+                onClick={lbNext}
+                className="hidden lg:flex absolute right-6 z-20 w-12 h-12 rounded-full bg-white/10 backdrop-blur-md items-center justify-center text-white hover:bg-white/20 transition-colors"
+                aria-label="Gambar Selanjutnya"
+              >
+                <ChevronRight className="w-6 h-6" />
+              </button>
+            </>
+          )}
+
+          <div
+            className="relative z-10 w-full h-full flex items-center justify-center p-4 overflow-hidden"
+            onClick={(e) => e.stopPropagation()} // Mencegah klik di foto tertutup
+          >
+            <motion.img
+              key={lightboxIndex}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.2 }}
+              src={images[lightboxIndex]}
+              alt={`${title} - gambar ${lightboxIndex + 1}`}
+              drag={images.length > 1 ? "x" : false}
+              dragConstraints={{ left: 0, right: 0 }}
+              dragElastic={0.3}
+              onDragEnd={handleDragEnd}
+              className="max-w-full max-h-[85vh] object-contain rounded-lg select-none cursor-grab active:cursor-grabbing shadow-2xl"
+              draggable={false}
+            />
+          </div>
+
+          {/* Tombol Kontrol Mobile */}
+          {images.length > 1 && (
+            <div
+              className="flex lg:hidden gap-8 absolute bottom-6 z-20"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                onClick={lbPrev}
+                className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/20 transition-colors"
+              >
+                <ChevronLeft className="w-6 h-6" />
+              </button>
+              <button
+                onClick={lbNext}
+                className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/20 transition-colors"
+              >
+                <ChevronRight className="w-6 h-6" />
+              </button>
+            </div>
+          )}
+        </div>
+      )}
     </>
   );
 }
