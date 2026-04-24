@@ -50,9 +50,12 @@ export function getTranslations(): ContentTranslations {
     const stored = localStorage.getItem(TRANSLATIONS_KEY);
     if (stored) {
       const parsed = JSON.parse(stored);
-      return { ...defaultTranslations, ...parsed };
+      // Cegah jika hasil parse berupa null
+      return parsed ? { ...defaultTranslations, ...parsed } : defaultTranslations;
     }
-  } catch {}
+  } catch (e) {
+    console.warn("Gagal membaca localStorage terjemahan", e);
+  }
   return defaultTranslations;
 }
 
@@ -60,54 +63,62 @@ export function saveTranslations(translations: ContentTranslations): void {
   localStorage.setItem(TRANSLATIONS_KEY, JSON.stringify(translations));
 }
 
-// 🔥 INI ADALAH BAGIAN YANG SAYA PERBAIKI 🔥
 export function translateData(data: PortfolioData, lang: "en" | "id"): PortfolioData {
+  // Jika sedang bahasa inggris, tidak perlu translasi
   if (lang === "en") return data;
 
-  // Prioritaskan mengambil dari data.translations (API) 
-  // Jika API kosong, fallback ke getTranslations() lokal agar tidak error
-  const apiTranslations = data.translations && Object.keys(data.translations).length > 0 
-    ? data.translations 
-    : getTranslations();
+  // 1. Ekstrak data terjemahan API dengan sangat hati-hati
+  let apiTrans = data?.translations;
+  
+  // Jika apiTrans bernilai null, undefined, atau berupa array kosong (kasus sering terjadi di Laravel), pakai local
+  if (!apiTrans || typeof apiTrans !== "object" || Array.isArray(apiTrans)) {
+    apiTrans = getTranslations() || {};
+  }
 
-  // Gabungkan dengan defaultTranslations agar struktur datanya terjamin aman
-  const t: ContentTranslations = {
-    ...defaultTranslations,
-    ...apiTranslations,
-    profile: { ...defaultTranslations.profile, ...(apiTranslations.profile || {}) },
-    experiences: { ...defaultTranslations.experiences, ...(apiTranslations.experiences || {}) },
-    projects: { ...defaultTranslations.projects, ...(apiTranslations.projects || {}) },
-    volunteers: { ...defaultTranslations.volunteers, ...(apiTranslations.volunteers || {}) },
-    awards: { ...defaultTranslations.awards, ...(apiTranslations.awards || {}) },
-    languages: { ...defaultTranslations.languages, ...(apiTranslations.languages || {}) },
-  };
+  // 2. Validasi setiap keys agar tidak ada yang bernilai "null" atau "undefined" 
+  // (Jika null, fallback ke default)
+  const tProfile = apiTrans.profile || defaultTranslations.profile || {};
+  const tExperiences = apiTrans.experiences || defaultTranslations.experiences || {};
+  const tProjects = apiTrans.projects || defaultTranslations.projects || {};
+  const tVolunteers = apiTrans.volunteers || defaultTranslations.volunteers || {};
+  const tAwards = apiTrans.awards || defaultTranslations.awards || {};
+  const tLanguages = apiTrans.languages || defaultTranslations.languages || {};
 
+  // Validasi data profil asli juga
+  const safeProfile = data?.profile || {};
+
+  // 3. Mapping data dengan aman
   return {
     ...data,
     profile: {
-      ...data.profile,
-      headline: t.profile?.headline || data.profile.headline,
-      about: t.profile?.about || data.profile.about,
+      ...safeProfile,
+      headline: tProfile.headline || safeProfile.headline || "",
+      about: tProfile.about || safeProfile.about || "",
     },
-    experiences: data.experiences.map((exp) => {
-      const tr = t.experiences?.[exp.id];
+    experiences: (data?.experiences || []).map((exp) => {
+      if (!exp || !exp.id) return exp;
+      const tr = tExperiences[exp.id];
       return tr ? { ...exp, description: tr.description || exp.description } : exp;
     }),
-    projects: data.projects.map((proj) => {
-      const tr = t.projects?.[proj.id];
+    projects: (data?.projects || []).map((proj) => {
+      if (!proj || !proj.id) return proj;
+      const tr = tProjects[proj.id];
       return tr ? { ...proj, description: tr.description || proj.description, role: tr.role || proj.role } : proj;
     }),
-    volunteers: data.volunteers.map((vol) => {
-      const tr = t.volunteers?.[vol.id];
+    volunteers: (data?.volunteers || []).map((vol) => {
+      if (!vol || !vol.id) return vol;
+      const tr = tVolunteers[vol.id];
       return tr ? { ...vol, description: tr.description || vol.description } : vol;
     }),
-    awards: data.awards.map((award) => {
-      const tr = t.awards?.[award.id];
+    awards: (data?.awards || []).map((award) => {
+      if (!award || !award.id) return award;
+      const tr = tAwards[award.id];
       return tr ? { ...award, description: tr.description || award.description } : award;
     }),
-    languages: data.languages.map((lang) => {
-      const tr = t.languages?.[lang.name];
-      return tr ? { ...lang, level: tr.level || lang.level } : lang;
+    languages: (data?.languages || []).map((langItem) => {
+      if (!langItem || !langItem.name) return langItem;
+      const tr = tLanguages[langItem.name];
+      return tr ? { ...langItem, level: tr.level || langItem.level } : langItem;
     }),
   };
 }
