@@ -4,39 +4,28 @@ type Lang = "en" | "id";
 
 const translations = {
   en: {
-    // Nav
     about: "About",
     experience: "Experience",
     education: "Education",
     projects: "Projects",
     skills: "Skills",
     contact: "Contact",
-    // Hero
     location: "Tangerang Selatan, Indonesia",
     contactMe: "Contact Me",
     downloadCv: "Download CV",
-    // About
     aboutMe: "About Me ✨",
-    // Experience
     experienceTitle: "Experience 💼",
     photos: "photo",
     photosPlural: "photos",
-    // Education
     educationTitle: "Education 🎓",
-    // Certifications
     certifications: "Certifications 📜",
     viewDetail: "View Detail",
-    // Projects
     projectsTitle: "Projects 🚀",
-    // Volunteer
     volunteer: "Volunteer Work 💖",
-    // Awards
     awards: "Awards & Honors 🏆",
-    // Skills
     skillsTitle: "Skills & Languages 🛠️",
     languages: "Languages",
     technicalSkills: "Technical Skills",
-    // Contact
     contactTitle: "Contact Me",
     name: "Name",
     email: "Email",
@@ -56,7 +45,6 @@ const translations = {
     toastErrorDesc: "An error occurred. Please try again later.",
     toastRateLimit: "Too fast! ⏳",
     toastRateLimitDesc: (secs: number) => `Wait ${secs} more seconds before sending another message.`,
-    // Footer
     madeWith: "Made with 💙",
   },
   id: {
@@ -118,13 +106,13 @@ interface LangContextType {
 }
 
 const LangContext = createContext<LangContextType>({
-  lang: "en",
+  lang: "id",
   setLang: () => {},
-  t: translations.en,
+  t: translations.id,
 });
 
 export function LangProvider({ children }: { children: ReactNode }) {
-  const [lang, setLang] = useState<Lang>("en");
+  const [lang, setLang] = useState<Lang>("id");
   return (
     <LangContext.Provider value={{ lang, setLang, t: translations[lang] }}>
       {children}
