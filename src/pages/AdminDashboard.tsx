@@ -48,6 +48,31 @@ import {
 import { changePassword, isSessionValid, clearSession } from "@/lib/adminAuth";
 import { useTheme } from "next-themes";
 
+// 👇 HELPER BARU: Untuk memastikan path gambar selalu valid dengan API kamu
+const getImageUrl = (path: string) => {
+  if (!path) return "";
+  
+  // 1. Paksa ubah jika API tidak sengaja mengirimkan URL localhost
+  if (path.includes("localhost") || path.includes("127.0.0.1")) {
+    path = path.replace(/http:\/\/(localhost|127\.0\.0\.1)(:\d+)?/g, "https://api.bangkitakhtar.com");
+  }
+
+  // 2. Jika sudah full URL yang benar (mengandung http/https/data), kembalikan utuh
+  if (path.startsWith("http://") || path.startsWith("https://") || path.startsWith("data:")) {
+    return path;
+  }
+
+  // 3. Bersihkan slash "/" di bagian paling depan jika ada
+  let cleanPath = path.startsWith("/") ? path.substring(1) : path;
+
+  // 4. Jika Laravel mengembalikan path seperti "uploads/..." tanpa "/storage/", kita pakaikan otomatis
+  if (!cleanPath.startsWith("storage/")) {
+    cleanPath = `storage/${cleanPath}`;
+  }
+
+  return `https://api.bangkitakhtar.com/${cleanPath}`;
+};
+
 function ThemeToggleAdmin() {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -627,7 +652,6 @@ export default function AdminDashboard() {
       const portfolio = await getData();
       setData(portfolio);
       
-      // 👇 TAMBAHAN BARU: Tarik translation dari DB dan pasang ke layar
       if (portfolio.translations && Object.keys(portfolio.translations).length > 0) {
         setTranslations(portfolio.translations);
       }
@@ -643,24 +667,40 @@ export default function AdminDashboard() {
 
   const save = async () => {
     if (!data) return; // Guard
+
+    // 👇 PEMBERSIHAN OTOMATIS: Merapikan tags dan spasi hanya ketika tombol "Save" ditekan
+    const cleanArray = (arr: string[]) => arr.map((s) => s.trim()).filter((s) => s.length > 0);
+
+    const cleanedData = {
+      ...data,
+      skills: cleanArray(data.skills),
+      languages: data.languages
+        .map((l) => ({ name: l.name.trim(), level: l.level.trim() }))
+        .filter((l) => l.name.length > 0),
+      experiences: data.experiences.map((exp) => ({
+        ...exp,
+        skills: cleanArray(exp.skills),
+      })),
+      education: data.education.map((edu) => ({
+        ...edu,
+        focus: cleanArray(edu.focus),
+      })),
+      projects: data.projects.map((proj) => ({
+        ...proj,
+        tags: cleanArray(proj.tags),
+      })),
+      translations: translations,
+    };
+
     try {
-      // 👇 TAMBAHAN BARU: Gabungkan translations ke dalam data utama
-      const finalDataToSave = {
-        ...data,
-        translations: translations
-      };
-
-      // 👇 TAMBAHAN BARU: Simpan semuanya sekaligus lewat 1 pintu API portfolio
-      // (Kita menghapus fetch ke /translations karena route tersebut tidak ada di Laravel)
-      await saveData(finalDataToSave);
-
+      await saveData(cleanedData);
+      setData(cleanedData); // Update layar dengan data yang sudah rapi
       toast({
         title: "Success",
         description: "Data berhasil disimpan!",
       });
     } catch (error) {
       console.error("Save error:", error);
-
       toast({
         title: "Error",
         description: "Gagal menyimpan data!",
@@ -967,8 +1007,9 @@ export default function AdminDashboard() {
         </button>
         {currentImage && (
           <>
+            {/* 👇 PERUBAHAN: Gunakan fungsi Helper untuk memastikan gambar di cPanel tampil */}
             <img
-              src={currentImage}
+              src={getImageUrl(currentImage)}
               alt=""
               className="w-10 h-10 rounded-lg object-cover border"
             />
@@ -1036,7 +1077,8 @@ export default function AdminDashboard() {
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-2">
           {images.map((img, i) => (
             <div key={i} className="border rounded-xl overflow-hidden bg-card">
-              <img src={img} alt="" className="w-full h-24 object-cover" />
+              {/* 👇 PERUBAHAN: Sama di sini juga */}
+              <img src={getImageUrl(img)} alt="" className="w-full h-24 object-cover" />
               <div className="p-2 flex items-center justify-between gap-2">
                 <button
                   type="button"
@@ -1236,17 +1278,15 @@ export default function AdminDashboard() {
                       <label className={labelClass}>
                         Skills (comma-separated)
                       </label>
+                      {/* 👇 PERUBAHAN: Hapus .trim() dan .filter() agar kamu bisa ngetik spasi/koma dengan santai */}
                       <input
                         className={inputClass}
-                        value={exp.skills.join(", ")}
+                        value={exp.skills.join(",")}
                         onChange={(e) =>
                           updateExperience(
                             exp.id,
                             "skills",
-                            e.target.value
-                              .split(",")
-                              .map((s) => s.trim())
-                              .filter((s) => s.length > 0)
+                            e.target.value.split(",")
                           )
                         }
                       />
@@ -1344,17 +1384,15 @@ export default function AdminDashboard() {
                       <label className={labelClass}>
                         Focus (comma-separated)
                       </label>
+                      {/* 👇 PERUBAHAN: Memperbaiki masalah ketik spasi */}
                       <input
                         className={inputClass}
-                        value={edu.focus.join(", ")}
+                        value={edu.focus.join(",")}
                         onChange={(e) =>
                           updateEducation(
                             edu.id,
                             "focus",
-                            e.target.value
-                              .split(",")
-                              .map((s) => s.trim())
-                              .filter((s) => s.length > 0)
+                            e.target.value.split(",")
                           )
                         }
                       />
@@ -1595,17 +1633,15 @@ export default function AdminDashboard() {
                       <label className={labelClass}>
                         Tags (comma-separated)
                       </label>
+                      {/* 👇 PERUBAHAN: Bebas ngetik spasi untuk Tags project */}
                       <input
                         className={inputClass}
-                        value={proj.tags.join(", ")}
+                        value={proj.tags.join(",")}
                         onChange={(e) =>
                           updateProject(
                             proj.id,
                             "tags",
-                            e.target.value
-                              .split(",")
-                              .map((s) => s.trim())
-                              .filter((s) => s.length > 0)
+                            e.target.value.split(",")
                           )
                         }
                         placeholder="e.g. React, Laravel, MySQL"
@@ -1865,21 +1901,18 @@ export default function AdminDashboard() {
               </h2>
             </div>
 
-            {/* GRID WRAPPER */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
               {/* SKILLS */}
               <div className="space-y-2">
                 <label className={labelClass}>Skills (comma-separated)</label>
+                {/* 👇 PERUBAHAN: Supaya ga error pas ngetik spasi/koma di skill utama */}
                 <input
                   className={inputClass}
-                  value={data.skills.join(", ")}
+                  value={data.skills.join(",")}
                   onChange={(e) =>
                     setData({
                       ...data,
-                      skills: e.target.value
-                        .split(",")
-                        .map((s) => s.trim())
-                        .filter((s) => s.length > 0),
+                      skills: e.target.value.split(","),
                     })
                   }
                 />
@@ -1890,24 +1923,28 @@ export default function AdminDashboard() {
                 <label className={labelClass}>
                   Languages (format: Name - Level, one per line)
                 </label>
+                {/* 👇 PERUBAHAN: Memastikan textarea bahasa tidak memaksa cursor lompat */}
                 <textarea
                   className={`${inputClass} min-h-[120px] resize-none`}
                   value={data.languages
-                    .map((l) => `${l.name} - ${l.level}`)
+                    .map((l) => {
+                      if (!l.name && !l.level) return "";
+                      return l.level ? `${l.name} - ${l.level}` : l.name;
+                    })
                     .join("\n")}
                   onChange={(e) =>
                     setData({
                       ...data,
-                      languages: e.target.value
-                        .split("\n")
-                        .filter(Boolean)
-                        .map((line) => {
-                          const [name, level] = line.split(" - ");
-                          return {
-                            name: name?.trim() || "",
-                            level: level?.trim() || "",
-                          };
-                        }),
+                      languages: e.target.value.split("\n").map((line) => {
+                        const idx = line.indexOf("-");
+                        if (idx === -1) {
+                          return { name: line, level: "" };
+                        }
+                        return {
+                          name: line.substring(0, idx),
+                          level: line.substring(idx + 1),
+                        };
+                      }),
                     })
                   }
                 />
