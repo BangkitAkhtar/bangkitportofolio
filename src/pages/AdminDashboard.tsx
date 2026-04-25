@@ -727,7 +727,7 @@ export default function AdminDashboard() {
       skills: [],
       images: [],
     };
-    setData({ ...data, experiences: [...data.experiences, newExp] });
+    setData({ ...data, experiences: [newExp, ...data.experiences] });
   };
 
   const updateExperience = (id: string, field: string, value: any) => {
@@ -759,7 +759,7 @@ export default function AdminDashboard() {
       focus: [],
       logo: "",
     };
-    setData({ ...data, education: [...data.education, newEdu] });
+    setData({ ...data, education: [newEdu, ...data.education] });
   };
 
   const updateEducation = (id: string, field: string, value: any) => {
@@ -785,7 +785,6 @@ export default function AdminDashboard() {
     setData({
       ...data,
       certifications: [
-        ...data.certifications,
         {
           id: Date.now().toString(),
           title: "",
@@ -796,6 +795,7 @@ export default function AdminDashboard() {
           image: "",
           images: [],
         },
+        ...data.certifications,
       ],
     });
   };
@@ -832,7 +832,7 @@ export default function AdminDashboard() {
       tags: [],
       images: [],
     };
-    setData({ ...data, projects: [...data.projects, newProject] });
+    setData({ ...data, projects: [newProject, ...data.projects] });
   };
 
   const updateProject = (id: string, field: string, value: any) => {
@@ -865,7 +865,7 @@ export default function AdminDashboard() {
       image: "",
       images: [],
     };
-    setData({ ...data, volunteers: [...data.volunteers, newVolunteer] });
+    setData({ ...data, volunteers: [newVolunteer, ...data.volunteers] });
   };
 
   const updateVolunteer = (id: string, field: string, value: any) => {
@@ -896,7 +896,7 @@ export default function AdminDashboard() {
       year: "",
       description: [""],
     };
-    setData({ ...data, awards: [...data.awards, newAward] });
+    setData({ ...data, awards: [newAward, ...data.awards] });
   };
 
   const updateAward = (id: string, field: string, value: any) => {
