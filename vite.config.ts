@@ -18,7 +18,7 @@ export default defineConfig(({ mode }) => ({
     mode === "development" && componentTagger(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.jpeg', 'icon.svg'],
+      includeAssets: ['favicon.webp', 'icon.svg'],
       manifest: {
         name: 'Bangkit Akhtar Fahd | Portfolio',
         short_name: 'Bangkit Folio',

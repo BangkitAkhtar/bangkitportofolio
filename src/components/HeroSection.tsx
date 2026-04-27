@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { FloatingElement } from "./AnimatedSection";
 import { PortfolioData } from "@/lib/data";
 import { useLang } from "@/lib/i18n";
-import defaultProfilePhoto from "@/assets/profile-photo.jpeg";
+import defaultProfilePhoto from "@/assets/profile-photo.webp";
 
 export function HeroSection({ data }: { data: PortfolioData }) {
   const { profile } = data;
