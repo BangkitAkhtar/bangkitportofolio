@@ -18,6 +18,7 @@ export default defineConfig(({ mode }) => ({
     mode === "development" && componentTagger(),
     VitePWA({
       registerType: 'autoUpdate',
+      injectRegister: 'script-defer',
       includeAssets: ['favicon.webp', 'icon.svg'],
       manifest: {
         name: 'Bangkit Akhtar Fahd | Portfolio',

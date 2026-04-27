@@ -1,17 +1,17 @@
 import { useState, useEffect, useMemo } from "react";
 import { getData, PortfolioData } from "@/lib/data";
 import { HeroSection } from "@/components/HeroSection";
-import { AboutSection } from "@/components/AboutSection";
-import { ExperienceSection } from "@/components/ExperienceSection";
-import { EducationSection } from "@/components/EducationSection";
-import {
-  CertificationsSection,
-  ProjectsSection,
-  VolunteerSection,
-  AwardsSection,
-  SkillsSection,
-} from "@/components/PortfolioSections";
-import { ContactSection } from "@/components/ContactSection";
+import { lazy, Suspense } from "react";
+
+const AboutSection = lazy(() => import("@/components/AboutSection").then(m => ({ default: m.AboutSection })));
+const ExperienceSection = lazy(() => import("@/components/ExperienceSection").then(m => ({ default: m.ExperienceSection })));
+const EducationSection = lazy(() => import("@/components/EducationSection").then(m => ({ default: m.EducationSection })));
+const CertificationsSection = lazy(() => import("@/components/PortfolioSections").then(m => ({ default: m.CertificationsSection })));
+const ProjectsSection = lazy(() => import("@/components/PortfolioSections").then(m => ({ default: m.ProjectsSection })));
+const VolunteerSection = lazy(() => import("@/components/PortfolioSections").then(m => ({ default: m.VolunteerSection })));
+const AwardsSection = lazy(() => import("@/components/PortfolioSections").then(m => ({ default: m.AwardsSection })));
+const SkillsSection = lazy(() => import("@/components/PortfolioSections").then(m => ({ default: m.SkillsSection })));
+const ContactSection = lazy(() => import("@/components/ContactSection").then(m => ({ default: m.ContactSection })));
 import { BackToTop } from "@/components/BackToTop";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Menu, X } from "lucide-react";
@@ -161,15 +161,17 @@ const Index = () => {
 
       <div className="h-14" />
       <HeroSection data={data} />
-      <AboutSection data={data} />
-      <ExperienceSection data={data} />
-      <EducationSection data={data} />
-      <CertificationsSection data={data} />
-      <ProjectsSection data={data} />
-      <VolunteerSection data={data} />
-      <AwardsSection data={data} />
-      <SkillsSection data={data} />
-      <ContactSection />
+      <Suspense fallback={<div className="h-20 flex items-center justify-center text-muted-foreground text-sm">Loading...</div>}>
+        <AboutSection data={data} />
+        <ExperienceSection data={data} />
+        <EducationSection data={data} />
+        <CertificationsSection data={data} />
+        <ProjectsSection data={data} />
+        <VolunteerSection data={data} />
+        <AwardsSection data={data} />
+        <SkillsSection data={data} />
+        <ContactSection />
+      </Suspense>
 
       <footer className="border-t border-border">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center">

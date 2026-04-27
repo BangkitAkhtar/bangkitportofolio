@@ -28,7 +28,7 @@ export function HeroSection({ data }: { data: PortfolioData }) {
             <div className="w-36 h-36 sm:w-44 sm:h-44 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 p-1 overflow-hidden">
               <div className="w-full h-full rounded-full flex items-center justify-center overflow-hidden hover:scale-110 transition-transform duration-200 cursor-pointer">
 
-                {profile.image ? <img loading="lazy" src={profile.image} alt={`Foto profil ${profile.name}`} className="w-full h-full object-cover" /> : <img loading="lazy" src={defaultProfilePhoto} alt={`Foto profil ${profile.name}`} className="w-full h-full object-cover" />}
+                {profile.image ? <img fetchPriority="high" src={profile.image} alt={`Foto profil ${profile.name}`} className="w-full h-full object-cover" /> : <img fetchPriority="high" src={defaultProfilePhoto} alt={`Foto profil ${profile.name}`} className="w-full h-full object-cover" />}
               </div>
             </div>
             <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.5, type: "spring", stiffness: 200 }} className="absolute -bottom-1 -right-1 w-10 h-10 rounded-full bg-primary flex items-center justify-center text-lg shadow-lg">👋</motion.div>
