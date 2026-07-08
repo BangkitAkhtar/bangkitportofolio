@@ -45,7 +45,7 @@ const Index = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <p className="text-muted-foreground text-sm">{t("loading")}</p>
+        <p className="text-muted-foreground text-sm">Loading portfolio...</p>
       </div>
     );
   }
