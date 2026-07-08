@@ -78,7 +78,8 @@ export async function verifyPassword(password: string): Promise<boolean> {
   if (limited) return false;
 
   try {
-    const res = await fetch("https://api.bangkitakhtar.com/api/login", {
+    const API_URL = import.meta.env.VITE_API_URL || "https://api.bangkitakhtar.com/api";
+    const res = await fetch(`${API_URL}/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ password })

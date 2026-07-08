@@ -302,7 +302,7 @@ function migrateData(stored: any): PortfolioData {
    API
 ========================= */
 
-const API_BASE = "https://api.bangkitakhtar.com/api";
+const API_BASE = import.meta.env.VITE_API_URL || "https://api.bangkitakhtar.com/api";
 
 export async function getData(): Promise<PortfolioData> {
   try {

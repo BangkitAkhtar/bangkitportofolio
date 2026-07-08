@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_BASE = "https://api.bangkitakhtar.com/api";
+const API_BASE = import.meta.env.VITE_API_URL || "https://api.bangkitakhtar.com/api";
 
 export async function uploadFile(file: File): Promise<string> {
   const formData = new FormData();

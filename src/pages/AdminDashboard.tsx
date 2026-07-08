@@ -19,6 +19,8 @@ import {
 } from "@/lib/translations";
 import { uploadFile } from "@/lib/fileUpload";
 import { useToast } from "@/hooks/use-toast";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   User,
   Briefcase,
@@ -706,6 +708,7 @@ function SecuritySection({
 export default function AdminDashboard() {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const [data, setData] = useState<PortfolioData | null>(null);
   const [translations, setTranslations] = useState<ContentTranslations>(
@@ -713,6 +716,19 @@ export default function AdminDashboard() {
   );
   const [section, setSection] = useState<Section>("profile");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [draggedItemIndex, setDraggedItemIndex] = useState<number | null>(null);
+
+  const { data: initialData, isLoading } = useQuery({ queryKey: ["portfolio"], queryFn: getData });
+
+  // Update local state when query data is loaded
+  useEffect(() => {
+    if (initialData && !data) {
+      setData(initialData);
+      if (initialData.translations && Object.keys(initialData.translations).length > 0) {
+        setTranslations(initialData.translations);
+      }
+    }
+  }, [initialData, data]);
 
   useEffect(() => {
     if (!isSessionValid()) {
@@ -721,21 +737,8 @@ export default function AdminDashboard() {
     }
   }, [navigate]);
 
-  useEffect(() => {
-    const fetchPortfolio = async () => {
-      const portfolio = await getData();
-      setData(portfolio);
-      
-      if (portfolio.translations && Object.keys(portfolio.translations).length > 0) {
-        setTranslations(portfolio.translations);
-      }
-    };
-
-    fetchPortfolio();
-  }, []);
-
   // INITIAL GUARD
-  if (!data) {
+  if (isLoading || !data) {
     return <div className="p-10 text-center">Loading portfolio data...</div>;
   }
 
@@ -776,6 +779,7 @@ export default function AdminDashboard() {
     try {
       await saveData(cleanedData);
       setData(cleanedData); // Update layar dengan data yang sudah rapi
+      queryClient.invalidateQueries({ queryKey: ["portfolio"] });
       toast({
         title: "Success",
         description: "Data berhasil disimpan!",

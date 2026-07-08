@@ -19,39 +19,17 @@ import { Menu, X } from "lucide-react";
 import { useLang } from "@/lib/i18n";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { translateData } from "@/lib/translations";
+import { useQuery } from "@tanstack/react-query";
 import { SEO } from "@/components/SEO";
 
 const Index = () => {
-  const [rawData, setRawData] = useState<PortfolioData | null>(null);
+  const { data: rawData, isLoading } = useQuery({ queryKey: ["portfolio"], queryFn: getData });
   const [mobileNav, setMobileNav] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { t, lang } = useLang();
 
   useEffect(() => {
-    const fetchPortfolio = async () => {
-      try {
-        const result = await getData();
-        setRawData(result);
-      } catch (error) {
-        console.error("Failed to load portfolio data:", error);
-      }
-    };
-
-    fetchPortfolio();
-  }, []);
-
-  useEffect(() => {
-    const handler = async () => {
-      try {
-        const result = await getData();
-        setRawData(result);
-      } catch (error) {
-        console.error("Failed to refresh portfolio data:", error);
-      }
-    };
-
-    window.addEventListener("storage", handler);
-    return () => window.removeEventListener("storage", handler);
+    // React Query handles background refetching automatically on window focus
   }, []);
 
   useEffect(() => {
@@ -59,18 +37,21 @@ const Index = () => {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
-
   const data = useMemo(() => {
     if (!rawData) return null;
     return translateData(rawData, lang);
   }, [rawData, lang]);
 
-  if (!data) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <p className="text-muted-foreground text-sm">Loading portfolio...</p>
+        <p className="text-muted-foreground text-sm">{t("loading")}</p>
       </div>
     );
+  }
+
+  if (!data) {
+    return null;
   }
 
   const navItems = [
