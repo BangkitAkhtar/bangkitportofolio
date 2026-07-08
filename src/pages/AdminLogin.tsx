@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Lock, ShieldAlert } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { verifyPassword, initializePassword, isRateLimited, createSession } from "@/lib/adminAuth";
+import { verifyPassword, initializePassword, isRateLimited } from "@/lib/adminAuth";
 
 export default function AdminLogin() {
   const [password, setPassword] = useState("");
@@ -39,7 +39,6 @@ export default function AdminLogin() {
     try {
       const valid = await verifyPassword(password);
       if (valid) {
-        createSession();
         navigate("/admin/dashboard");
       } else {
         const { limited: nowLimited } = isRateLimited();

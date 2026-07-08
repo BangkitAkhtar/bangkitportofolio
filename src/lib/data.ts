@@ -316,7 +316,12 @@ export async function getData(): Promise<PortfolioData> {
 
 export async function saveData(data: PortfolioData): Promise<void> {
   try {
-    await axios.post(`${API_BASE}/portfolio`, data);
+    const token = sessionStorage.getItem("admin_session_token");
+    await axios.post(`${API_BASE}/portfolio`, data, {
+      headers: {
+        "X-Admin-Token": token || ""
+      }
+    });
   } catch (err) {
     console.error("Save error:", err);
     throw err;

@@ -70,39 +70,40 @@ function resetAttempts(): void {
 }
 
 export async function initializePassword(): Promise<void> {
-  const stored = localStorage.getItem(ADMIN_HASH_KEY);
-  if (!stored) {
-    const hash = await hashPassword(getDefaultPassword());
-    localStorage.setItem(ADMIN_HASH_KEY, hash);
-  }
+  // Obsolete: Password is now handled securely in the backend .env
 }
 
 export async function verifyPassword(password: string): Promise<boolean> {
   const { limited } = isRateLimited();
   if (limited) return false;
 
-  await initializePassword();
-  const stored = localStorage.getItem(ADMIN_HASH_KEY);
-  const hash = await hashPassword(password);
-  const valid = hash === stored;
-
-  if (valid) {
-    resetAttempts();
-  } else {
-    recordFailedAttempt();
+  try {
+    const res = await fetch("https://api.bangkitakhtar.com/api/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password })
+    });
+    
+    if (res.ok) {
+      const data = await res.json();
+      if (data.success && data.token) {
+        sessionStorage.setItem(SESSION_TOKEN_KEY, data.token);
+        resetAttempts();
+        return true;
+      }
+    }
+  } catch (e) {
+    console.error("Login API error:", e);
   }
-  return valid;
+
+  recordFailedAttempt();
+  return false;
 }
 
-// Session management with cryptographic token
-export function createSession(): void {
-  const token = generateSessionToken();
-  sessionStorage.setItem(SESSION_TOKEN_KEY, token);
-}
-
+// Session management
 export function isSessionValid(): boolean {
   const token = sessionStorage.getItem(SESSION_TOKEN_KEY);
-  return !!token && token.length === 64;
+  return !!token; // As long as we have a token, we consider session valid. Backend will verify actual validity.
 }
 
 export function clearSession(): void {
@@ -110,14 +111,5 @@ export function clearSession(): void {
 }
 
 export async function changePassword(currentPassword: string, newPassword: string): Promise<{ success: boolean; error?: string }> {
-  const isValid = await verifyPassword(currentPassword);
-  if (!isValid) {
-    return { success: false, error: "Password lama salah" };
-  }
-  if (newPassword.length < 6) {
-    return { success: false, error: "Password baru minimal 6 karakter" };
-  }
-  const hash = await hashPassword(newPassword);
-  localStorage.setItem(ADMIN_HASH_KEY, hash);
-  return { success: true };
+  return { success: false, error: "Untuk keamanan, password admin kini dikelola langsung melalui file .env di panel hosting (cPanel) Anda." };
 }
