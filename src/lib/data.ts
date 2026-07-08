@@ -37,6 +37,17 @@ export interface Certification {
   images: string[];
 }
 
+export interface Training {
+  id: string;
+  title: string;
+  issuer: string;
+  issuerLogo: string;
+  year: string;
+  description: string;
+  image: string;
+  images: string[];
+}
+
 export interface Project {
   id: string;
   title: string;
@@ -84,6 +95,7 @@ export interface PortfolioData {
   experiences: Experience[];
   education: Education[];
   certifications: Certification[];
+  trainings: Training[];
   projects: Project[];
   volunteers: Volunteer[];
   awards: Award[];
@@ -115,6 +127,19 @@ export const defaultData: PortfolioData = {
   education: [],
 
   certifications: [
+    {
+      id: "1",
+      title: "",
+      issuer: "",
+      issuerLogo: "",
+      year: "",
+      description: "",
+      image: "",
+      images: [],
+    },
+  ],
+
+  trainings: [
     {
       id: "1",
       title: "",
@@ -204,6 +229,17 @@ function migrateData(stored: any): PortfolioData {
       description: c.description || "",
       image: c.image || "",
       images: Array.isArray(c.images) ? c.images : [],
+    }));
+  }
+
+  if (stored.trainings) {
+    stored.trainings = stored.trainings.map((t: any) => ({
+      ...t,
+      issuerLogo: t.issuerLogo || "",
+      year: t.year || "",
+      description: t.description || "",
+      image: t.image || "",
+      images: Array.isArray(t.images) ? t.images : [],
     }));
   }
 

@@ -7,6 +7,7 @@ const AboutSection = lazy(() => import("@/components/AboutSection").then(m => ({
 const ExperienceSection = lazy(() => import("@/components/ExperienceSection").then(m => ({ default: m.ExperienceSection })));
 const EducationSection = lazy(() => import("@/components/EducationSection").then(m => ({ default: m.EducationSection })));
 const CertificationsSection = lazy(() => import("@/components/PortfolioSections").then(m => ({ default: m.CertificationsSection })));
+const TrainingsSection = lazy(() => import("@/components/PortfolioSections").then(m => ({ default: m.TrainingsSection })));
 const ProjectsSection = lazy(() => import("@/components/PortfolioSections").then(m => ({ default: m.ProjectsSection })));
 const VolunteerSection = lazy(() => import("@/components/PortfolioSections").then(m => ({ default: m.VolunteerSection })));
 const AwardsSection = lazy(() => import("@/components/PortfolioSections").then(m => ({ default: m.AwardsSection })));
@@ -87,14 +88,14 @@ const Index = () => {
         title={`${data.profile.name} | Portfolio`} 
         description={data.profile.headline} 
       />
-      <nav
+      <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
           scrolled
             ? "bg-card/80 backdrop-blur-xl border-b border-border shadow-lg"
             : "bg-card/50 backdrop-blur-sm"
         }`}
       >
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-14">
+        <nav className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-14">
           <button
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
             className="font-extrabold text-foreground text-sm tracking-tight hover:scale-105 transition-transform cursor-pointer bg-transparent border-none p-0"
@@ -130,7 +131,7 @@ const Index = () => {
               )}
             </button>
           </div>
-        </div>
+        </nav>
 
         {mobileNav && (
           <div className="sm:hidden border-t border-border bg-card/95 backdrop-blur-xl animate-fade-in">
@@ -157,21 +158,25 @@ const Index = () => {
             </div>
           </div>
         )}
-      </nav>
+      </header>
 
       <div className="h-14" />
-      <HeroSection data={data} />
-      <Suspense fallback={<div className="h-20 flex items-center justify-center text-muted-foreground text-sm">Loading...</div>}>
-        <AboutSection data={data} />
-        <ExperienceSection data={data} />
-        <EducationSection data={data} />
-        <CertificationsSection data={data} />
-        <ProjectsSection data={data} />
-        <VolunteerSection data={data} />
-        <AwardsSection data={data} />
-        <SkillsSection data={data} />
-        <ContactSection />
-      </Suspense>
+      
+      <main>
+        <HeroSection data={data} />
+        <Suspense fallback={<div className="h-20 flex items-center justify-center text-muted-foreground text-sm">Loading...</div>}>
+          <AboutSection data={data} />
+          <ExperienceSection data={data} />
+          <EducationSection data={data} />
+          <CertificationsSection data={data} />
+          <TrainingsSection data={data} />
+          <ProjectsSection data={data} />
+          <VolunteerSection data={data} />
+          <AwardsSection data={data} />
+          <SkillsSection data={data} />
+          <ContactSection />
+        </Suspense>
+      </main>
 
       <footer className="border-t border-border">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center">

@@ -12,9 +12,10 @@ import {
   ArrowRight,
   ChevronLeft,
   ChevronRight,
+  BookOpen,
 } from "lucide-react";
 import { AnimatedSection, StaggerContainer, StaggerItem } from "./AnimatedSection";
-import { PortfolioData, Certification, Project, Volunteer } from "@/lib/data";
+import { PortfolioData, Certification, Training, Project, Volunteer } from "@/lib/data";
 import { DetailDialog } from "./DetailDialog";
 import { useLang } from "@/lib/i18n";
 
@@ -141,9 +142,12 @@ const NativeScrollWithDots = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-const ensureLines = (value?: string | string[]) => {
+const ensureLines = (value?: string | string[] | null) => {
   if (!value) return [];
-  if (Array.isArray(value)) return value;
+  if (Array.isArray(value)) {
+    return value.filter((line): line is string => typeof line === "string" && line.trim() !== "");
+  }
+  if (typeof value !== "string") return [];
   return value.split("\n").filter(Boolean);
 };
 
@@ -160,7 +164,7 @@ const formatInlineText = (text: string) => {
 };
 
 const renderDescriptionLines = (
-  lines: string[] | string | undefined,
+  lines: string[] | string | undefined | null,
   clamp = false
 ) => {
   const normalized = ensureLines(lines);
@@ -169,6 +173,7 @@ const renderDescriptionLines = (
   return (
     <div className={`space-y-2 ${clamp ? "line-clamp-3 overflow-hidden" : ""}`}>
       {normalized.map((line, index) => {
+        if (!line) return null;
         const trimmed = line.trim();
         if (!trimmed) return null;
 
@@ -209,21 +214,24 @@ const renderDescriptionLines = (
   );
 };
 
-const renderPlainDescription = (text?: string | string[]) => {
+const renderPlainDescription = (text?: string | string[] | null) => {
   const normalized = ensureLines(text);
   if (!normalized.length) return null;
 
   return (
     <div className="space-y-2">
-      {normalized.map((line, i) => (
-        <p
-          key={i}
-          className="text-muted-foreground text-sm leading-relaxed"
-          dangerouslySetInnerHTML={{
-            __html: formatInlineText(line),
-          }}
-        />
-      ))}
+      {normalized.map((line, i) => {
+        if (!line) return null;
+        return (
+          <p
+            key={i}
+            className="text-muted-foreground text-sm leading-relaxed"
+            dangerouslySetInnerHTML={{
+              __html: formatInlineText(line),
+            }}
+          />
+        );
+      })}
     </div>
   );
 };
@@ -303,6 +311,117 @@ export function CertificationsSection({ data }: { data: PortfolioData }) {
 
                   <div className="mt-3">
                     {renderDescriptionLines(cert.description, true)}
+                  </div>
+
+                  <div className="flex items-center gap-1.5 mt-3 text-primary text-xs font-semibold group-hover:gap-2.5 transition-all duration-200">
+                    <Eye className="w-3.5 h-3.5" />
+                    <span>{t.viewDetail}</span>
+                    <ArrowRight className="w-3 h-3 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </NativeScrollWithDots>
+        </AnimatedSection>
+      </div>
+
+      <DetailDialog
+        open={!!selected}
+        onClose={() => setSelected(null)}
+        title={selected?.title || ""}
+        subtitle={[selected?.issuer, selected?.year].filter(Boolean).join(" • ")}
+        description={
+          Array.isArray(selected?.description)
+            ? selected?.description.join("\n")
+            : selected?.description
+        }
+        images={[
+          ...(selected?.image ? [selected.image] : []),
+          ...(selected?.images || []),
+        ]}
+      />
+    </section>
+  );
+}
+
+/* =========================
+   TRAININGS
+========================= */
+
+export function TrainingsSection({ data }: { data: PortfolioData }) {
+  const [selected, setSelected] = useState<Training | null>(null);
+  const { t } = useLang();
+
+  if (!data.trainings || data.trainings.length === 0 || !data.trainings[0].title) {
+    return null; // hide if empty, actually we'll just render it for consistency if it exists
+  }
+
+  return (
+    <section id="trainings" className="bg-card/30 border-b border-border">
+      <div className="section-container">
+        <AnimatedSection>
+          <h2 className="section-title">
+            <BookOpen className="w-7 h-7 text-primary" />
+            {t.trainings}
+          </h2>
+        </AnimatedSection>
+
+        <AnimatedSection delay={0.15}>
+          <NativeScrollWithDots>
+            {data.trainings.map((training) => (
+              <div
+                key={training.id}
+                className="card-elevated min-w-[240px] sm:min-w-[300px] max-w-[320px] flex-shrink-0 snap-center overflow-hidden cursor-pointer group hover:-translate-y-1.5 transition-transform duration-200 select-none"
+                onClick={() => setSelected(training)}
+              >
+                <div className="w-full h-36 bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center overflow-hidden">
+                  {training.image ? (
+                    <img
+                      src={training.image}
+                      alt={`Training ${training.title} from ${training.issuer}`}
+                      draggable={false}
+                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <BookOpen className="w-12 h-12 text-primary/40" />
+                  )}
+                </div>
+
+                <div className="p-5">
+                  <div className="flex items-start gap-3">
+                    {training.issuerLogo ? (
+                      <img
+                        src={training.issuerLogo}
+                        alt={`Logo ${training.issuer}`}
+                        draggable={false}
+                        className="w-8 h-8 rounded-lg object-cover flex-shrink-0 border"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center flex-shrink-0">
+                        <Building2 className="w-4 h-4 text-primary/60" />
+                      </div>
+                    )}
+
+                    <div className="min-w-0">
+                      <h3 className="font-bold text-foreground text-sm leading-snug line-clamp-2">
+                        {training.title}
+                      </h3>
+                      <p className="text-muted-foreground text-xs mt-1">
+                        {training.issuer}
+                      </p>
+
+                      {training.year && (
+                        <p className="text-primary text-xs font-semibold mt-1">
+                          {training.year}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="mt-3">
+                    {renderDescriptionLines(training.description, true)}
                   </div>
 
                   <div className="flex items-center gap-1.5 mt-3 text-primary text-xs font-semibold group-hover:gap-2.5 transition-all duration-200">

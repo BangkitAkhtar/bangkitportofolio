@@ -8,15 +8,17 @@ interface SEOProps {
 }
 
 export function SEO({
-  title = "Bangkit Akhtar Fahd | Portfolio",
-  description = "Undergraduate Computer Science Student at BINUS University | Web Developer | Tech Enthusiast",
-  image = "https://your-domain.com/og-image.jpg", // TODO: Update this URL when you have a real OG image
+  title = "Bangkit Akhtar Fahd | Full-Stack Developer Portfolio Undergraduate Computer Science Student BINUS University",
+  description = "Portfolio profesional Bangkit Akhtar Fahd, mahasiswa Computer Science Binus University yang berfokus pada Full-Stack Web Development dan Manajerial IT Digital Transformation.",
+  image = "https://api.bangkitakhtar.com/storage/uploads/bangkitfoto.webp",
   url = "https://bangkitakhtar.com",
 }: SEOProps) {
   return (
     <Helmet>
       <title>{title}</title>
       <meta name="description" content={description} />
+      <meta name="keywords" content="Bangkit Akhtar Fahd, Portfolio, Full-Stack Developer, Computer Science, BINUS University, Web Developer, IT Digital Transformation" />
+      <link rel="canonical" href={url} />
       
       {/* Open Graph / Facebook */}
       <meta property="og:type" content="website" />

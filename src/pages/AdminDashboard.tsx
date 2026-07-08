@@ -7,6 +7,7 @@ import {
   Experience,
   Project,
   Certification,
+  Training,
   Volunteer,
   Award,
   Education,
@@ -44,6 +45,7 @@ import {
   Italic,
   List,
   ListOrdered,
+  BookOpen,
 } from "lucide-react";
 import { changePassword, isSessionValid, clearSession } from "@/lib/adminAuth";
 import { useTheme } from "next-themes";
@@ -101,6 +103,7 @@ type Section =
   | "experiences"
   | "education"
   | "certifications"
+  | "trainings"
   | "projects"
   | "volunteers"
   | "awards"
@@ -113,6 +116,7 @@ const sidebarItems: { key: Section; label: string; icon: React.ElementType }[] =
   { key: "experiences", label: "Experiences", icon: Briefcase },
   { key: "education", label: "Education", icon: GraduationCap },
   { key: "certifications", label: "Certifications", icon: AwardIcon },
+  { key: "trainings", label: "Training & Courses", icon: BookOpen },
   { key: "projects", label: "Projects", icon: FolderOpen },
   { key: "volunteers", label: "Volunteer", icon: Heart },
   { key: "awards", label: "Awards", icon: Trophy },
@@ -669,12 +673,19 @@ export default function AdminDashboard() {
     if (!data) return; // Guard
 
     // 👇 PEMBERSIHAN OTOMATIS: Merapikan tags dan spasi hanya ketika tombol "Save" ditekan
-    const cleanArray = (arr: string[]) => arr.map((s) => s.trim()).filter((s) => s.length > 0);
+    const cleanArray = (arr: string[]) => {
+      if (!Array.isArray(arr)) return [];
+      return arr
+        .filter((s) => typeof s === "string" && s !== null)
+        .map((s) => s.trim())
+        .filter((s) => s.length > 0);
+    };
 
     const cleanedData = {
       ...data,
       skills: cleanArray(data.skills),
-      languages: data.languages
+      languages: (data.languages || [])
+        .filter((l) => l && typeof l.name === "string" && typeof l.level === "string")
         .map((l) => ({ name: l.name.trim(), level: l.level.trim() }))
         .filter((l) => l.name.length > 0),
       experiences: data.experiences.map((exp) => ({
@@ -815,6 +826,44 @@ export default function AdminDashboard() {
     setData({
       ...data,
       certifications: data.certifications.filter((c) => c.id !== id),
+    });
+  };
+
+  const addTraining = () => {
+    if (!data) return; // Guard
+    setData({
+      ...data,
+      trainings: [
+        {
+          id: Date.now().toString(),
+          title: "",
+          issuer: "",
+          issuerLogo: "",
+          year: "",
+          description: [""],
+          image: "",
+          images: [],
+        },
+        ...data.trainings,
+      ],
+    });
+  };
+
+  const updateTraining = (id: string, field: string, value: any) => {
+    if (!data) return; // Guard
+    setData({
+      ...data,
+      trainings: data.trainings.map((t) =>
+        t.id === id ? { ...t, [field]: value } : t
+      ),
+    });
+  };
+
+  const removeTraining = (id: string) => {
+    if (!data) return; // Guard
+    setData({
+      ...data,
+      trainings: data.trainings.filter((t) => t.id !== id),
     });
   };
 
@@ -1522,6 +1571,118 @@ export default function AdminDashboard() {
                   </div>
                   <button
                     onClick={() => removeCertification(cert.id)}
+                    className="ml-3 text-destructive hover:opacity-70"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        );
+
+      case "trainings":
+        return (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-foreground">
+                Manage Trainings & Courses
+              </h2>
+              <button
+                onClick={addTraining}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-sm font-medium"
+              >
+                <Plus className="w-4 h-4" /> Add
+              </button>
+            </div>
+            {data.trainings.map((train, idx) => (
+              <div key={train.id} className="card-elevated w-full p-6 space-y-4">
+                <div className="flex justify-between items-start">
+                  <ReorderButtons
+                    index={idx}
+                    total={data.trainings.length}
+                    onMove={(dir) =>
+                      setData({
+                        ...data,
+                        trainings: moveItem(data.trainings, idx, dir),
+                      })
+                    }
+                  />
+                  <div className="flex-1 space-y-3">
+                    <div>
+                      <label className={labelClass}>Title</label>
+                      <input
+                        className={inputClass}
+                        value={train.title}
+                        onChange={(e) =>
+                          updateTraining(train.id, "title", e.target.value)
+                        }
+                      />
+                    </div>
+                    <div>
+                      <label className={labelClass}>Issuer</label>
+                      <input
+                        className={inputClass}
+                        value={train.issuer}
+                        onChange={(e) =>
+                          updateTraining(train.id, "issuer", e.target.value)
+                        }
+                      />
+                    </div>
+                    <div>
+                      <label className={labelClass}>Year</label>
+                      <input
+                        className={inputClass}
+                        value={train.year}
+                        onChange={(e) =>
+                          updateTraining(train.id, "year", e.target.value)
+                        }
+                        placeholder="e.g. 2025"
+                      />
+                    </div>
+                    <ImageUploadButton
+                      label="Issuer Logo"
+                      currentImage={train.issuerLogo}
+                      onUpload={() =>
+                        handleFileUpload((url) =>
+                          updateTraining(train.id, "issuerLogo", url)
+                        )
+                      }
+                      onClear={() =>
+                        updateTraining(train.id, "issuerLogo", "")
+                      }
+                    />
+
+                    <RichTextEditor
+                      id={`training-${train.id}`}
+                      label="Description"
+                      value={Array.isArray(train.description) ? train.description.join("\n") : train.description || ""}
+                      onChange={(val) =>
+                        updateTraining(train.id, "description", val.split("\n"))
+                      }
+                      inputClass={inputClass}
+                      labelClass={labelClass}
+                    />
+
+                    <ImageUploadButton
+                      label="Cover Image"
+                      currentImage={train.image}
+                      onUpload={() =>
+                        handleFileUpload((url) =>
+                          updateTraining(train.id, "image", url)
+                        )
+                      }
+                      onClear={() => updateTraining(train.id, "image", "")}
+                    />
+                    <ImagesUploadGrid
+                      images={train.images}
+                      onUpdate={(imgs) =>
+                        updateTraining(train.id, "images", imgs)
+                      }
+                    />
+                  </div>
+                  <button
+                    onClick={() => removeTraining(train.id)}
                     className="ml-3 text-destructive hover:opacity-70"
                   >
                     <Trash2 className="w-4 h-4" />
