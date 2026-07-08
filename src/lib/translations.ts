@@ -6,6 +6,8 @@ export interface ContentTranslations {
     about: string;
   };
   experiences: Record<string, { description: string[] }>;
+  certifications: Record<string, { description: string }>;
+  trainings: Record<string, { description: string }>;
   projects: Record<string, { description: string; role: string }>;
   volunteers: Record<string, { description: string }>;
   awards: Record<string, { description: string }>;
@@ -27,6 +29,8 @@ const defaultTranslations: ContentTranslations = {
     "5": { description: ["Mempelajari Figma, design thinking, dan teknik prototyping"] },
     "6": { description: ["Mendampingi partisipan internasional dan nasional selama acara kompetisi"] },
   },
+  certifications: {},
+  trainings: {},
   projects: {
     "1": { description: "Mobile app yang dirancang untuk mendukung bisnis UMKM, dibuat sebagai Figma prototype untuk kompetisi desain.", role: "UI/UX Designer" },
     "2": { description: "User research dan interface design yang komprehensif untuk platform advertising management.", role: "UI/UX Designer" },
@@ -79,6 +83,8 @@ export function translateData(data: PortfolioData, lang: "en" | "id"): Portfolio
   // (Jika null, fallback ke default)
   const tProfile = apiTrans.profile || defaultTranslations.profile || {};
   const tExperiences = apiTrans.experiences || defaultTranslations.experiences || {};
+  const tCertifications = apiTrans.certifications || defaultTranslations.certifications || {};
+  const tTrainings = apiTrans.trainings || defaultTranslations.trainings || {};
   const tProjects = apiTrans.projects || defaultTranslations.projects || {};
   const tVolunteers = apiTrans.volunteers || defaultTranslations.volunteers || {};
   const tAwards = apiTrans.awards || defaultTranslations.awards || {};
@@ -99,6 +105,16 @@ export function translateData(data: PortfolioData, lang: "en" | "id"): Portfolio
       if (!exp || !exp.id) return exp;
       const tr = tExperiences[exp.id];
       return tr ? { ...exp, description: tr.description || exp.description } : exp;
+    }),
+    certifications: (data?.certifications || []).map((cert) => {
+      if (!cert || !cert.id) return cert;
+      const tr = tCertifications[cert.id];
+      return tr ? { ...cert, description: tr.description || cert.description } : cert;
+    }),
+    trainings: (data?.trainings || []).map((train) => {
+      if (!train || !train.id) return train;
+      const tr = tTrainings[train.id];
+      return tr ? { ...train, description: tr.description || train.description } : train;
     }),
     projects: (data?.projects || []).map((proj) => {
       if (!proj || !proj.id) return proj;

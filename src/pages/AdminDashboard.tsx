@@ -128,6 +128,8 @@ const sidebarItems: { key: Section; label: string; icon: React.ElementType }[] =
 type TranslationSubSection =
   | "profile"
   | "experiences"
+  | "certifications"
+  | "trainings"
   | "projects"
   | "volunteers"
   | "awards"
@@ -283,6 +285,8 @@ function TranslationsEditor({
   const subTabs: { key: TranslationSubSection; label: string }[] = [
     { key: "profile", label: "Profile" },
     { key: "experiences", label: `Experiences (${tData.experiences.length})` },
+    { key: "certifications", label: `Certifications (${tData.certifications?.length || 0})` },
+    { key: "trainings", label: `Trainings (${tData.trainings?.length || 0})` },
     { key: "projects", label: `Projects (${tData.projects.length})` },
     { key: "volunteers", label: `Volunteer (${tData.volunteers.length})` },
     { key: "awards", label: `Awards (${tData.awards.length})` },
@@ -464,6 +468,72 @@ function TranslationsEditor({
                       volunteers: {
                         ...tTranslations.volunteers,
                         [vol.id]: { description: e.target.value },
+                      },
+                    })
+                  }
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {sub === "certifications" && (
+        <div className="space-y-3">
+          {(!tData.certifications || tData.certifications.length === 0) && (
+            <p className="text-sm text-muted-foreground italic">
+              Belum ada sertifikasi. Tambahkan di section Certifications dulu.
+            </p>
+          )}
+          {tData.certifications?.map((cert) => (
+            <div key={cert.id} className="card-elevated p-4 space-y-2">
+              <p className="text-xs text-muted-foreground">
+                🇬🇧 {cert.title} — {cert.issuer}
+              </p>
+              <div>
+                <label className={tLabelClass}>Description (ID)</label>
+                <textarea
+                  className={`${tInputClass} min-h-[60px]`}
+                  value={tTranslations.certifications?.[cert.id]?.description || ""}
+                  onChange={(e) =>
+                    tSetTranslations({
+                      ...tTranslations,
+                      certifications: {
+                        ...(tTranslations.certifications || {}),
+                        [cert.id]: { description: e.target.value },
+                      },
+                    })
+                  }
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {sub === "trainings" && (
+        <div className="space-y-3">
+          {(!tData.trainings || tData.trainings.length === 0) && (
+            <p className="text-sm text-muted-foreground italic">
+              Belum ada pelatihan. Tambahkan di section Trainings dulu.
+            </p>
+          )}
+          {tData.trainings?.map((train) => (
+            <div key={train.id} className="card-elevated p-4 space-y-2">
+              <p className="text-xs text-muted-foreground">
+                🇬🇧 {train.title} — {train.issuer}
+              </p>
+              <div>
+                <label className={tLabelClass}>Description (ID)</label>
+                <textarea
+                  className={`${tInputClass} min-h-[60px]`}
+                  value={tTranslations.trainings?.[train.id]?.description || ""}
+                  onChange={(e) =>
+                    tSetTranslations({
+                      ...tTranslations,
+                      trainings: {
+                        ...(tTranslations.trainings || {}),
+                        [train.id]: { description: e.target.value },
                       },
                     })
                   }
