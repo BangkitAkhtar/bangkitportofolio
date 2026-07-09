@@ -4,6 +4,7 @@ import {
   getData,
   saveData,
   PortfolioData,
+  DEFAULT_SECTION_ORDER,
   Experience,
   Project,
   Certification,
@@ -113,18 +114,32 @@ type Section =
   | "translations"
   | "security";
 
-const sidebarItems: { key: Section; label: string; icon: React.ElementType }[] = [
+export const staticTopSidebarItems: { key: Section; label: string; icon: React.ElementType }[] = [
   { key: "profile", label: "Profile", icon: User },
-  { key: "experiences", label: "Experiences", icon: Briefcase },
-  { key: "education", label: "Education", icon: GraduationCap },
-  { key: "trainings", label: "Training & Courses", icon: BookOpen },
-  { key: "projects", label: "Projects", icon: FolderOpen },
-  { key: "certifications", label: "Certifications", icon: AwardIcon },
-  { key: "volunteers", label: "Volunteer", icon: Heart },
-  { key: "awards", label: "Awards", icon: Trophy },
-  { key: "skills", label: "Skills", icon: Wrench },
+];
+
+export const dynamicSidebarItemsMap: Record<string, { key: Section; label: string; icon: React.ElementType }> = {
+  about: { key: "profile", label: "About (in Profile)", icon: User }, // Just a fallback, but 'about' is part of profile
+  experiences: { key: "experiences", label: "Experiences", icon: Briefcase },
+  education: { key: "education", label: "Education", icon: GraduationCap },
+  certifications: { key: "certifications", label: "Certifications", icon: AwardIcon },
+  trainings: { key: "trainings", label: "Training & Courses", icon: BookOpen },
+  projects: { key: "projects", label: "Projects", icon: FolderOpen },
+  volunteers: { key: "volunteers", label: "Volunteer", icon: Heart },
+  awards: { key: "awards", label: "Awards", icon: Trophy },
+  skills: { key: "skills", label: "Skills", icon: Wrench },
+};
+
+export const staticBottomSidebarItems: { key: Section; label: string; icon: React.ElementType }[] = [
   { key: "translations", label: "Translations 🇮🇩", icon: Languages },
   { key: "security", label: "Security", icon: KeyRound },
+];
+
+// Fallback legacy array for other lookups if needed, but we will compute the real list dynamically
+const sidebarItems: { key: Section; label: string; icon: React.ElementType }[] = [
+  ...staticTopSidebarItems,
+  ...Object.values(dynamicSidebarItemsMap).filter(i => i.key !== "profile"),
+  ...staticBottomSidebarItems,
 ];
 
 type TranslationSubSection =
@@ -717,6 +732,20 @@ export default function AdminDashboard() {
   const [section, setSection] = useState<Section>("profile");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [draggedItemIndex, setDraggedItemIndex] = useState<number | null>(null);
+
+  const moveSidebarSection = (index: number, direction: -1 | 1) => {
+    if (!data || !data.sectionOrder) return;
+    const newOrder = [...data.sectionOrder];
+    const newIndex = index + direction;
+    if (newIndex < 0 || newIndex >= newOrder.length) return;
+    
+    // Swap
+    const temp = newOrder[index];
+    newOrder[index] = newOrder[newIndex];
+    newOrder[newIndex] = temp;
+    
+    setData({ ...data, sectionOrder: newOrder });
+  };
 
   const { data: initialData, isLoading } = useQuery({ queryKey: ["portfolio"], queryFn: getData });
 
@@ -2231,7 +2260,73 @@ export default function AdminDashboard() {
         </div>
 
         <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
-          {sidebarItems.map((item) => (
+          {/* Static Top */}
+          {staticTopSidebarItems.map((item) => (
+            <button
+              key={item.key}
+              onClick={() => {
+                setSection(item.key);
+                setSidebarOpen(false);
+              }}
+              className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                section === item.key
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+              }`}
+            >
+              <item.icon className="w-4 h-4" />
+              {item.label}
+            </button>
+          ))}
+
+          {/* Dynamic Sections */}
+          <div className="py-2 border-y my-2 space-y-1">
+            <div className="px-3 pb-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              Sections Order
+            </div>
+            {data?.sectionOrder?.map((key, index) => {
+              const item = dynamicSidebarItemsMap[key];
+              if (!item) return null;
+              
+              return (
+                <div key={key} className="group relative w-full flex items-center gap-1">
+                  <button
+                    onClick={() => {
+                      setSection(item.key);
+                      setSidebarOpen(false);
+                    }}
+                    className={`flex-1 flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      section === item.key
+                        ? "bg-primary text-primary-foreground"
+                        : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+                    }`}
+                  >
+                    <item.icon className="w-4 h-4" />
+                    <span className="truncate">{item.label}</span>
+                  </button>
+                  <div className="opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center transition-opacity">
+                    <button
+                      onClick={() => moveSidebarSection(index, -1)}
+                      disabled={index === 0}
+                      className="p-1 hover:text-foreground text-muted-foreground disabled:opacity-30 disabled:hover:text-muted-foreground"
+                    >
+                      <ChevronUp className="w-3 h-3" />
+                    </button>
+                    <button
+                      onClick={() => moveSidebarSection(index, 1)}
+                      disabled={index === (data?.sectionOrder?.length || 0) - 1}
+                      className="p-1 hover:text-foreground text-muted-foreground disabled:opacity-30 disabled:hover:text-muted-foreground"
+                    >
+                      <ChevronDown className="w-3 h-3" />
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Static Bottom */}
+          {staticBottomSidebarItems.map((item) => (
             <button
               key={item.key}
               onClick={() => {

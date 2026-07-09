@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { getData, PortfolioData } from "@/lib/data";
+import { getData, PortfolioData, DEFAULT_SECTION_ORDER } from "@/lib/data";
 import { HeroSection } from "@/components/HeroSection";
 import { lazy, Suspense } from "react";
 
@@ -53,6 +53,20 @@ const Index = () => {
   if (!data) {
     return null;
   }
+
+  const sectionsMap: Record<string, JSX.Element> = {
+    about: <AboutSection data={data} key="about" />,
+    experiences: <ExperienceSection data={data} key="experiences" />,
+    education: <EducationSection data={data} key="education" />,
+    certifications: <CertificationsSection data={data} key="certifications" />,
+    trainings: <TrainingsSection data={data} key="trainings" />,
+    projects: <ProjectsSection data={data} key="projects" />,
+    volunteers: <VolunteerSection data={data} key="volunteers" />,
+    awards: <AwardsSection data={data} key="awards" />,
+    skills: <SkillsSection data={data} key="skills" />,
+  };
+
+  const sectionOrder = data.sectionOrder || DEFAULT_SECTION_ORDER;
 
   const navItems = [
     { label: t.about, href: "#about" },
@@ -146,15 +160,7 @@ const Index = () => {
       <main>
         <HeroSection data={data} />
         <Suspense fallback={<div className="h-20 flex items-center justify-center text-muted-foreground text-sm">Loading...</div>}>
-          <AboutSection data={data} />
-          <ExperienceSection data={data} />
-          <EducationSection data={data} />
-          <TrainingsSection data={data} />
-          <ProjectsSection data={data} />
-          <CertificationsSection data={data} />
-          <VolunteerSection data={data} />
-          <AwardsSection data={data} />
-          <SkillsSection data={data} />
+          {sectionOrder.map((key) => sectionsMap[key] || null)}
           <ContactSection />
         </Suspense>
       </main>

@@ -102,7 +102,20 @@ export interface PortfolioData {
   skills: string[];
   languages: { name: string; level: string }[];
   translations?: any; // siap untuk API nanti
+  sectionOrder?: string[];
 }
+
+export const DEFAULT_SECTION_ORDER = [
+  "about",
+  "experiences",
+  "education",
+  "certifications",
+  "trainings",
+  "projects",
+  "volunteers",
+  "awards",
+  "skills",
+];
 
 /* =========================
    DEFAULT DATA
@@ -193,6 +206,7 @@ export const defaultData: PortfolioData = {
 
   skills: [],
   languages: [],
+  sectionOrder: DEFAULT_SECTION_ORDER,
 };
 
 /* =========================
@@ -291,6 +305,7 @@ function migrateData(stored: any): PortfolioData {
     : [];
 
   stored.translations = stored.translations || {};
+  stored.sectionOrder = stored.sectionOrder || DEFAULT_SECTION_ORDER;
 
   return {
     ...defaultData,
