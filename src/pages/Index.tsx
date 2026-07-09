@@ -149,9 +149,9 @@ const Index = () => {
           <AboutSection data={data} />
           <ExperienceSection data={data} />
           <EducationSection data={data} />
-          <CertificationsSection data={data} />
           <TrainingsSection data={data} />
           <ProjectsSection data={data} />
+          <CertificationsSection data={data} />
           <VolunteerSection data={data} />
           <AwardsSection data={data} />
           <SkillsSection data={data} />
