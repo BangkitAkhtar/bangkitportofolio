@@ -119,7 +119,6 @@ export const staticTopSidebarItems: { key: Section; label: string; icon: React.E
 ];
 
 export const dynamicSidebarItemsMap: Record<string, { key: Section; label: string; icon: React.ElementType }> = {
-  about: { key: "profile", label: "About (in Profile)", icon: User }, // Just a fallback, but 'about' is part of profile
   experiences: { key: "experiences", label: "Experiences", icon: Briefcase },
   education: { key: "education", label: "Education", icon: GraduationCap },
   certifications: { key: "certifications", label: "Certifications", icon: AwardIcon },
@@ -2280,10 +2279,7 @@ export default function AdminDashboard() {
           ))}
 
           {/* Dynamic Sections */}
-          <div className="py-2 border-y my-2 space-y-1">
-            <div className="px-3 pb-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              Sections Order
-            </div>
+          <>
             {data?.sectionOrder?.map((key, index) => {
               const item = dynamicSidebarItemsMap[key];
               if (!item) return null;
@@ -2323,7 +2319,7 @@ export default function AdminDashboard() {
                 </div>
               );
             })}
-          </div>
+          </>
 
           {/* Static Bottom */}
           {staticBottomSidebarItems.map((item) => (

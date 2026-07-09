@@ -106,7 +106,6 @@ export interface PortfolioData {
 }
 
 export const DEFAULT_SECTION_ORDER = [
-  "about",
   "experiences",
   "education",
   "certifications",
@@ -306,6 +305,10 @@ function migrateData(stored: any): PortfolioData {
 
   stored.translations = stored.translations || {};
   stored.sectionOrder = stored.sectionOrder || DEFAULT_SECTION_ORDER;
+  // Fallback if 'about' was accidentally saved in previous version
+  if (stored.sectionOrder) {
+    stored.sectionOrder = stored.sectionOrder.filter((k: string) => k !== "about");
+  }
 
   return {
     ...defaultData,

@@ -160,6 +160,7 @@ const Index = () => {
       <main>
         <HeroSection data={data} />
         <Suspense fallback={<div className="h-20 flex items-center justify-center text-muted-foreground text-sm">Loading...</div>}>
+          <AboutSection data={data} />
           {sectionOrder.map((key) => sectionsMap[key] || null)}
           <ContactSection />
         </Suspense>
