@@ -324,7 +324,7 @@ const API_BASE = import.meta.env.VITE_API_URL || "https://api.bangkitakhtar.com/
 
 export async function getData(): Promise<PortfolioData> {
   try {
-    const res = await axios.get(`${API_BASE}/portfolio`);
+    const res = await axios.get(`${API_BASE}/portfolio`, { timeout: 10000 });
     return migrateData(res.data);
   } catch (err) {
     console.error("Fetch error:", err);
@@ -336,6 +336,7 @@ export async function saveData(data: PortfolioData): Promise<void> {
   try {
     const token = sessionStorage.getItem("admin_session_token");
     await axios.post(`${API_BASE}/portfolio`, data, {
+      timeout: 15000,
       headers: {
         "X-Admin-Token": token || ""
       }
