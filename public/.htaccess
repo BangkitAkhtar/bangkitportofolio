@@ -1,3 +1,28 @@
+# ============================================
+#  Compression (fallback jika server-level off)
+# ============================================
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css application/javascript text/javascript application/json image/svg+xml application/xml
+</IfModule>
+
+# ============================================
+#  Cache statis: file ber-hash = aman immutable 1 tahun
+# ============================================
+<IfModule mod_headers.c>
+  # Aset build (JS, CSS, font, gambar) — nama sudah ada hash, tidak pernah berubah
+  <FilesMatch "\.(js|css|woff2?|ttf|otf|eot|webp|jpe?g|png|gif|svg|ico)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+
+  # index.html & service worker — WAJIB selalu fresh agar deploy baru langsung kebaca
+  <FilesMatch "(index\.html|sw\.js|registerSW\.js|manifest\.webmanifest)$">
+    Header set Cache-Control "no-cache, must-revalidate"
+  </FilesMatch>
+</IfModule>
+
+# ============================================
+#  SPA routing (React Router)
+# ============================================
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /
