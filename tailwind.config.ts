@@ -107,15 +107,35 @@ export default {
           "0%, 100%": { transform: "translateY(-8px)" },
           "50%": { transform: "translateY(8px)" },
         },
+        // Blob drift untuk background hero (GPU-composited, pengganti framer-motion)
+        blob: {
+          "0%, 100%": { transform: "translate(0px, 0px) scale(1)" },
+          "33%": { transform: "translate(24px, -20px) scale(1.1)" },
+          "66%": { transform: "translate(-20px, 24px) scale(0.95)" },
+        },
+        // Entrance foto profil hero
+        "pop-in": {
+          "0%": { opacity: "0", transform: "scale(0.5)" },
+          "100%": { opacity: "1", transform: "scale(1)" },
+        },
+        // Entrance badge kecil (👋)
+        "scale-in": {
+          "0%": { transform: "scale(0)" },
+          "80%": { transform: "scale(1.15)" },
+          "100%": { transform: "scale(1)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        "fade-in-up": "fade-in-up 0.6s ease-out",
-        "fade-in": "fade-in 0.5s ease-out",
+        "fade-in-up": "fade-in-up 0.6s ease-out both",
+        "fade-in": "fade-in 0.5s ease-out both",
         "slide-in-left": "slide-in-left 0.5s ease-out",
         // Tambahkan animasi float ini
         float: "float 3s ease-in-out infinite",
+        blob: "blob 8s ease-in-out infinite",
+        "pop-in": "pop-in 0.7s cubic-bezier(0.25,0.46,0.45,0.94) both",
+        "scale-in": "scale-in 0.5s cubic-bezier(0.34,1.56,0.64,1) both",
       },
 
     },
