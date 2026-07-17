@@ -26,11 +26,18 @@ const Index = () => {
   const { data: rawData } = useQuery({ queryKey: ["portfolio"], queryFn: getData });
   const [mobileNav, setMobileNav] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  // Tahan indikator loading minimal ~0.8s supaya benar-benar terlihat, walau
+  // API sangat cepat (di jaringan/cache API bisa balik <250ms).
+  const [minDelayDone, setMinDelayDone] = useState(false);
   const { t, lang } = useLang();
 
   useEffect(() => {
-    // React Query handles background refetching automatically on window focus
+    const timer = setTimeout(() => setMinDelayDone(true), 800);
+    return () => clearTimeout(timer);
   }, []);
+
+  // isLoading = data belum siap ATAU durasi minimal loading belum lewat
+  const isLoading = !rawData || !minDelayDone;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -149,8 +156,8 @@ const Index = () => {
       <main>
         {/* loading={!rawData} → tulisan "loading..." tampil di bawah tombol hero
             selama data API belum siap, lalu hilang saat konten lengkap dimuat. */}
-        <HeroSection data={data} loading={!rawData} />
-        {rawData && (
+        <HeroSection data={data} loading={isLoading} />
+        {!isLoading && (
           <Suspense fallback={null}>
             <AboutSection data={data} />
             {sectionOrder.map((key) => sectionsMap[key] || null)}
@@ -161,7 +168,7 @@ const Index = () => {
 
       {/* Footer & tombol scroll baru muncul saat data lengkap — selama loading
           halaman hanya berisi hero + "loading..." dan belum bisa di-scroll. */}
-      {rawData && (
+      {!isLoading && (
         <>
           <footer className="border-t border-border">
             <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center">

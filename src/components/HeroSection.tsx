@@ -59,9 +59,12 @@ export function HeroSection({ data, loading = false }: { data: PortfolioData; lo
             </a>
           </div>
 
-          {/* Tulisan "loading..." di bawah tombol — tampil selama data API belum siap */}
+          {/* Indikator "loading..." di bawah tombol — tampil selama data API belum siap */}
           {loading && (
-            <p className="text-muted-foreground text-sm animate-pulse" aria-live="polite">loading...</p>
+            <div className="flex items-center gap-2 text-muted-foreground" aria-live="polite" aria-busy="true">
+              <span className="w-4 h-4 rounded-full border-2 border-muted-foreground/40 border-t-primary animate-spin" />
+              <span className="text-base font-medium animate-pulse">loading...</span>
+            </div>
           )}
         </div>
       </div>
