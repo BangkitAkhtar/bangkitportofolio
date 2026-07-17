@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { getData, PortfolioData, DEFAULT_SECTION_ORDER } from "@/lib/data";
+import { getData, PortfolioData, DEFAULT_SECTION_ORDER, defaultData } from "@/lib/data";
 import { HeroSection } from "@/components/HeroSection";
 import { lazy, Suspense } from "react";
 
@@ -23,7 +23,7 @@ import { useQuery } from "@tanstack/react-query";
 import { SEO } from "@/components/SEO";
 
 const Index = () => {
-  const { data: rawData, isLoading } = useQuery({ queryKey: ["portfolio"], queryFn: getData });
+  const { data: rawData } = useQuery({ queryKey: ["portfolio"], queryFn: getData });
   const [mobileNav, setMobileNav] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { t, lang } = useLang();
@@ -37,22 +37,9 @@ const Index = () => {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
-  const data = useMemo(() => {
-    if (!rawData) return null;
-    return translateData(rawData, lang);
-  }, [rawData, lang]);
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <p className="text-muted-foreground text-sm">Loading portfolio...</p>
-      </div>
-    );
-  }
-
-  if (!data) {
-    return null;
-  }
+  // Selalu punya data untuk render langsung: pakai defaultData (nama + headline asli
+  // sudah ada) sampai data API masuk. Tidak ada lagi layar "Loading...".
+  const data = useMemo(() => translateData(rawData || defaultData, lang), [rawData, lang]);
 
   const sectionsMap: Record<string, JSX.Element> = {
     about: <AboutSection data={data} key="about" />,
@@ -161,11 +148,14 @@ const Index = () => {
       
       <main>
         <HeroSection data={data} />
-        <Suspense fallback={<div className="h-20 flex items-center justify-center text-muted-foreground text-sm">Loading...</div>}>
-          <AboutSection data={data} />
-          {sectionOrder.map((key) => sectionsMap[key] || null)}
-          <ContactSection />
-        </Suspense>
+        {/* Section muncul begitu data API masuk — tanpa layar/tulisan loading */}
+        {rawData && (
+          <Suspense fallback={null}>
+            <AboutSection data={data} />
+            {sectionOrder.map((key) => sectionsMap[key] || null)}
+            <ContactSection />
+          </Suspense>
+        )}
       </main>
 
       <footer className="border-t border-border">
