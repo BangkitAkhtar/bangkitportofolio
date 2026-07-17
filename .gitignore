@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Deploy artifacts (zip hasil build untuk upload ke cPanel — jangan masuk repo)
+*.zip
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
