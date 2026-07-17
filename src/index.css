@@ -193,4 +193,32 @@
   }
 }
 
+/* Stagger reveal-on-scroll (CSS, pengganti framer-motion StaggerContainer/Item) */
+.stagger-item {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+  will-change: opacity, transform;
+}
+.stagger.in-view .stagger-item {
+  opacity: 1;
+  transform: none;
+}
+.stagger.in-view .stagger-item:nth-child(1) { transition-delay: 0s; }
+.stagger.in-view .stagger-item:nth-child(2) { transition-delay: 0.08s; }
+.stagger.in-view .stagger-item:nth-child(3) { transition-delay: 0.16s; }
+.stagger.in-view .stagger-item:nth-child(4) { transition-delay: 0.24s; }
+.stagger.in-view .stagger-item:nth-child(5) { transition-delay: 0.32s; }
+.stagger.in-view .stagger-item:nth-child(6) { transition-delay: 0.40s; }
+.stagger.in-view .stagger-item:nth-child(7) { transition-delay: 0.48s; }
+.stagger.in-view .stagger-item:nth-child(n+8) { transition-delay: 0.56s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .stagger-item {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
  

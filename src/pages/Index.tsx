@@ -78,7 +78,7 @@ const Index = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background animate-fade-in">
+    <div className="min-h-screen bg-background">
       <SEO 
         title={`${data.profile.name} | Portfolio`} 
         description={data.profile.headline} 

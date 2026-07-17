@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, lazy, Suspense } from "react";
 import { Briefcase, Building2, ImageIcon } from "lucide-react";
 import { AnimatedSection, StaggerContainer, StaggerItem } from "./AnimatedSection";
-import { Lightbox } from "./Lightbox";
+const Lightbox = lazy(() => import("./Lightbox").then((m) => ({ default: m.Lightbox })));
 import { PortfolioData } from "@/lib/data";
 import { useLang } from "@/lib/i18n";
 
@@ -136,7 +136,11 @@ export function ExperienceSection({ data }: { data: PortfolioData }) {
           </StaggerContainer>
         </div>
       </section>
-      {lightbox && <Lightbox images={lightbox.images} initialIndex={lightbox.index} onClose={() => setLightbox(null)} />}
+      {lightbox && (
+        <Suspense fallback={null}>
+          <Lightbox images={lightbox.images} initialIndex={lightbox.index} onClose={() => setLightbox(null)} />
+        </Suspense>
+      )}
     </>
   );
 }

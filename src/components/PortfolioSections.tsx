@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import { AnimatedSection, StaggerContainer, StaggerItem } from "./AnimatedSection";
 import { PortfolioData, Certification, Training, Project, Volunteer } from "@/lib/data";
-import { DetailDialog } from "./DetailDialog";
+import { DetailDialog } from "./DetailDialogLazy";
 import { useLang } from "@/lib/i18n";
 
 /* =========================
