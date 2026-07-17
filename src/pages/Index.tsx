@@ -37,18 +37,9 @@ const Index = () => {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+  // Render langsung dengan defaultData supaya hero (elemen LCP) tampil seketika
+  // tanpa menunggu API — foto sudah di-preload di index.html.
   const data = useMemo(() => translateData(rawData || defaultData, lang), [rawData, lang]);
-
-  // Selama data API belum siap, tampilkan spinner yang identik dengan yang di index.html
-  // (mulus: spinner sebelum-JS → spinner ini → halaman lengkap sekaligus).
-  if (!rawData) {
-    return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4">
-        <div className="w-10 h-10 rounded-full border-[3px] border-muted border-t-primary animate-spin" />
-        <p className="text-muted-foreground text-sm">Memuat...</p>
-      </div>
-    );
-  }
 
   const sectionsMap: Record<string, JSX.Element> = {
     about: <AboutSection data={data} key="about" />,
@@ -157,11 +148,23 @@ const Index = () => {
       
       <main>
         <HeroSection data={data} />
-        <Suspense fallback={null}>
-          <AboutSection data={data} />
-          {sectionOrder.map((key) => sectionsMap[key] || null)}
-          <ContactSection />
-        </Suspense>
+        {rawData ? (
+          <Suspense fallback={null}>
+            <AboutSection data={data} />
+            {sectionOrder.map((key) => sectionsMap[key] || null)}
+            <ContactSection />
+          </Suspense>
+        ) : (
+          // Hero sudah tampil; bagian bawah masih menunggu data API → indikator "Memuat..."
+          <div
+            className="flex flex-col items-center justify-center gap-3 py-24"
+            aria-live="polite"
+            aria-busy="true"
+          >
+            <div className="w-8 h-8 rounded-full border-[3px] border-muted border-t-primary animate-spin" />
+            <p className="text-muted-foreground text-sm">Memuat...</p>
+          </div>
+        )}
       </main>
 
       <footer className="border-t border-border">
