@@ -37,9 +37,18 @@ const Index = () => {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
-  // Selalu punya data untuk render langsung: pakai defaultData (nama + headline asli
-  // sudah ada) sampai data API masuk. Tidak ada lagi layar "Loading...".
   const data = useMemo(() => translateData(rawData || defaultData, lang), [rawData, lang]);
+
+  // Selama data API belum siap, tampilkan spinner yang identik dengan yang di index.html
+  // (mulus: spinner sebelum-JS → spinner ini → halaman lengkap sekaligus).
+  if (!rawData) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4">
+        <div className="w-10 h-10 rounded-full border-[3px] border-muted border-t-primary animate-spin" />
+        <p className="text-muted-foreground text-sm">Memuat...</p>
+      </div>
+    );
+  }
 
   const sectionsMap: Record<string, JSX.Element> = {
     about: <AboutSection data={data} key="about" />,
@@ -148,14 +157,11 @@ const Index = () => {
       
       <main>
         <HeroSection data={data} />
-        {/* Section muncul begitu data API masuk — tanpa layar/tulisan loading */}
-        {rawData && (
-          <Suspense fallback={null}>
-            <AboutSection data={data} />
-            {sectionOrder.map((key) => sectionsMap[key] || null)}
-            <ContactSection />
-          </Suspense>
-        )}
+        <Suspense fallback={null}>
+          <AboutSection data={data} />
+          {sectionOrder.map((key) => sectionsMap[key] || null)}
+          <ContactSection />
+        </Suspense>
       </main>
 
       <footer className="border-t border-border">
