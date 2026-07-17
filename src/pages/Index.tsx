@@ -159,15 +159,21 @@ const Index = () => {
         )}
       </main>
 
-      <footer className="border-t border-border">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center">
-          <p className="text-muted-foreground text-sm">
-            © {new Date().getFullYear()} {data.profile.name} · {t.madeWith}
-          </p>
-        </div>
-      </footer>
+      {/* Footer & tombol scroll baru muncul saat data lengkap — selama loading
+          halaman hanya berisi hero + "loading..." dan belum bisa di-scroll. */}
+      {rawData && (
+        <>
+          <footer className="border-t border-border">
+            <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center">
+              <p className="text-muted-foreground text-sm">
+                © {new Date().getFullYear()} {data.profile.name} · {t.madeWith}
+              </p>
+            </div>
+          </footer>
 
-      <BackToTop />
+          <BackToTop />
+        </>
+      )}
     </div>
   );
 };
