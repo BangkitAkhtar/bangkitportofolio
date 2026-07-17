@@ -118,6 +118,8 @@ const Index = () => {
             <button
               className="text-foreground"
               onClick={() => setMobileNav(!mobileNav)}
+              aria-label={mobileNav ? "Tutup menu" : "Buka menu"}
+              aria-expanded={mobileNav}
             >
               {mobileNav ? (
                 <X className="w-5 h-5" />

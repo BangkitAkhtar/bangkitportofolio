@@ -23,7 +23,8 @@ export function HeroSection({ data }: { data: PortfolioData }) {
 
       <div className="section-container relative z-10 py-20 sm:py-28">
         <div className="flex flex-col items-center text-center gap-8">
-          <div className="relative animate-pop-in">
+          {/* Foto = elemen LCP → render seketika, tanpa fade opacity yang menunda LCP */}
+          <div className="relative">
             <div className="w-36 h-36 sm:w-44 sm:h-44 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 p-1 overflow-hidden">
               <div className="w-full h-full rounded-full flex items-center justify-center overflow-hidden hover:scale-110 transition-transform duration-200 cursor-pointer">
 
