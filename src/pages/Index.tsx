@@ -28,10 +28,6 @@ const Index = () => {
   const [scrolled, setScrolled] = useState(false);
   const { t, lang } = useLang();
 
-  // Hero tampil langsung; "loading..." hanya menunggu data konten (bagian yang
-  // di-scroll) siap. Begitu data ada → konten muncul & tulisan loading hilang.
-  const isLoading = !rawData;
-
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -147,10 +143,8 @@ const Index = () => {
       <div className="h-14" />
       
       <main>
-        {/* loading={!rawData} → tulisan "loading..." tampil di bawah tombol hero
-            selama data API belum siap, lalu hilang saat konten lengkap dimuat. */}
-        <HeroSection data={data} loading={isLoading} />
-        {!isLoading && (
+        <HeroSection data={data} />
+        {rawData && (
           <Suspense fallback={null}>
             <AboutSection data={data} />
             {sectionOrder.map((key) => sectionsMap[key] || null)}
@@ -159,9 +153,8 @@ const Index = () => {
         )}
       </main>
 
-      {/* Footer & tombol scroll baru muncul saat data lengkap — selama loading
-          halaman hanya berisi hero + "loading..." dan belum bisa di-scroll. */}
-      {!isLoading && (
+      {/* Footer & tombol scroll muncul saat data konten siap. */}
+      {rawData && (
         <>
           <footer className="border-t border-border">
             <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center">
