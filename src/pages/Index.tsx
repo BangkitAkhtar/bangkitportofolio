@@ -26,18 +26,11 @@ const Index = () => {
   const { data: rawData } = useQuery({ queryKey: ["portfolio"], queryFn: getData });
   const [mobileNav, setMobileNav] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  // Tahan indikator loading minimal ~0.8s supaya benar-benar terlihat, walau
-  // API sangat cepat (di jaringan/cache API bisa balik <250ms).
-  const [minDelayDone, setMinDelayDone] = useState(false);
   const { t, lang } = useLang();
 
-  useEffect(() => {
-    const timer = setTimeout(() => setMinDelayDone(true), 800);
-    return () => clearTimeout(timer);
-  }, []);
-
-  // isLoading = data belum siap ATAU durasi minimal loading belum lewat
-  const isLoading = !rawData || !minDelayDone;
+  // Hero tampil langsung; "loading..." hanya menunggu data konten (bagian yang
+  // di-scroll) siap. Begitu data ada → konten muncul & tulisan loading hilang.
+  const isLoading = !rawData;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
