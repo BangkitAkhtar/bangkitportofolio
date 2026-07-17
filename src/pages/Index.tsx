@@ -147,23 +147,15 @@ const Index = () => {
       <div className="h-14" />
       
       <main>
-        <HeroSection data={data} />
-        {rawData ? (
+        {/* loading={!rawData} → tulisan "loading..." tampil di bawah tombol hero
+            selama data API belum siap, lalu hilang saat konten lengkap dimuat. */}
+        <HeroSection data={data} loading={!rawData} />
+        {rawData && (
           <Suspense fallback={null}>
             <AboutSection data={data} />
             {sectionOrder.map((key) => sectionsMap[key] || null)}
             <ContactSection />
           </Suspense>
-        ) : (
-          // Hero sudah tampil; bagian bawah masih menunggu data API → indikator "Memuat..."
-          <div
-            className="flex flex-col items-center justify-center gap-3 py-24"
-            aria-live="polite"
-            aria-busy="true"
-          >
-            <div className="w-8 h-8 rounded-full border-[3px] border-muted border-t-primary animate-spin" />
-            <p className="text-muted-foreground text-sm">Memuat...</p>
-          </div>
         )}
       </main>
 

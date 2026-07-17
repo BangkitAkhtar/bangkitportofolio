@@ -3,7 +3,7 @@ import { PortfolioData } from "@/lib/data";
 import { useLang } from "@/lib/i18n";
 import defaultProfilePhoto from "@/assets/profile-photo.webp";
 
-export function HeroSection({ data }: { data: PortfolioData }) {
+export function HeroSection({ data, loading = false }: { data: PortfolioData; loading?: boolean }) {
   const { profile } = data;
   const { t } = useLang();
 
@@ -58,6 +58,11 @@ export function HeroSection({ data }: { data: PortfolioData }) {
               <Mail className="w-4 h-4" /> {t.contactMe}
             </a>
           </div>
+
+          {/* Tulisan "loading..." di bawah tombol — tampil selama data API belum siap */}
+          {loading && (
+            <p className="text-muted-foreground text-sm animate-pulse" aria-live="polite">loading...</p>
+          )}
         </div>
       </div>
 
