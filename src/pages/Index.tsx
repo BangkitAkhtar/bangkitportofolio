@@ -33,21 +33,11 @@ const Index = () => {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+  // Hero pakai defaultData (nama/headline/about sudah cocok dengan data asli) supaya
+  // render SEKETIKA tanpa menunggu API — ini elemen LCP, jadi ini yang paling menentukan
+  // skor mobile. Section & footer TETAP ditahan sebagai satu unit (lihat komentar di bawah)
+  // supaya insersinya tetap "atomic" — bukan section demi section yang bisa memicu CLS.
   const data = useMemo(() => translateData(rawData || defaultData, lang), [rawData, lang]);
-
-  // Gate SELURUH halaman di belakang kesiapan data, supaya transisi loading -> selesai
-  // adalah SATU swap utuh (bukan hero duluan lalu section+footer menyusul belakangan).
-  // Render sebagian (hero instan, section menyusul) terbukti memicu CLS besar karena
-  // puluhan elemen (section + gambar) tiba-tiba disisipkan sekaligus pertengahan.
-  // Arsitektur "semua sekaligus" ini yang sebelumnya terbukti CLS 0 / skor 87 mobile.
-  if (!rawData) {
-    return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4">
-        <div className="w-10 h-10 rounded-full border-[3px] border-muted border-t-primary animate-spin" />
-        <p className="text-muted-foreground text-sm">Memuat...</p>
-      </div>
-    );
-  }
 
   const sectionsMap: Record<string, JSX.Element> = {
     about: <AboutSection data={data} key="about" />,
@@ -156,24 +146,29 @@ const Index = () => {
       
       <main>
         <HeroSection data={data} />
-        {/* Footer ada di dalam Suspense yang sama dengan section-section (bukan sibling
-            terpisah di luar <main>). Kalau footer render duluan (sebelum chunk lazy section
-            selesai download), ia akan menempati posisi tepat di bawah hero, lalu MELOMPAT
-            jauh ke bawah begitu semua section akhirnya mount — persis pola yang menyebabkan
-            CLS 0.56 kemarin. Dengan footer ikut ditahan di boundary yang sama, footer baru
-            muncul SETELAH semua section selesai, jadi posisi pertamanya sudah final. */}
-        <Suspense fallback={null}>
-          <AboutSection data={data} />
-          {sectionOrder.map((key) => sectionsMap[key] || null)}
-          <ContactSection />
-          <footer className="border-t border-border">
-            <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center">
-              <p className="text-muted-foreground text-sm">
-                © {new Date().getFullYear()} {data.profile.name} · {t.madeWith}
-              </p>
-            </div>
-          </footer>
-        </Suspense>
+        {/* Section + footer HANYA dirender setelah data API benar-benar siap (rawData),
+            bukan dengan defaultData — kalau section render duluan dengan array kosong lalu
+            "tumbuh" saat data asli masuk, itu SAMA BERBAHAYANYA dengan bug footer kemarin.
+            Dan footer tetap di Suspense yang SAMA dengan section-section (bukan sibling
+            terpisah): kalau footer render duluan sebelum chunk lazy section selesai
+            download, ia menempati posisi tepat di bawah hero lalu MELOMPAT jauh ke bawah
+            begitu section akhirnya mount — persis pola yang menyebabkan CLS 0.56 kemarin.
+            Dengan begini, insersi section+footer tetap satu unit "atomic" (aman CLS),
+            sementara hero di atas tetap render seketika (cepat di FCP/LCP). */}
+        {rawData && (
+          <Suspense fallback={null}>
+            <AboutSection data={data} />
+            {sectionOrder.map((key) => sectionsMap[key] || null)}
+            <ContactSection />
+            <footer className="border-t border-border">
+              <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center">
+                <p className="text-muted-foreground text-sm">
+                  © {new Date().getFullYear()} {data.profile.name} · {t.madeWith}
+                </p>
+              </div>
+            </footer>
+          </Suspense>
+        )}
       </main>
 
       <BackToTop />
