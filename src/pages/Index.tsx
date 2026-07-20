@@ -156,20 +156,25 @@ const Index = () => {
       
       <main>
         <HeroSection data={data} />
+        {/* Footer ada di dalam Suspense yang sama dengan section-section (bukan sibling
+            terpisah di luar <main>). Kalau footer render duluan (sebelum chunk lazy section
+            selesai download), ia akan menempati posisi tepat di bawah hero, lalu MELOMPAT
+            jauh ke bawah begitu semua section akhirnya mount — persis pola yang menyebabkan
+            CLS 0.56 kemarin. Dengan footer ikut ditahan di boundary yang sama, footer baru
+            muncul SETELAH semua section selesai, jadi posisi pertamanya sudah final. */}
         <Suspense fallback={null}>
           <AboutSection data={data} />
           {sectionOrder.map((key) => sectionsMap[key] || null)}
           <ContactSection />
+          <footer className="border-t border-border">
+            <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center">
+              <p className="text-muted-foreground text-sm">
+                © {new Date().getFullYear()} {data.profile.name} · {t.madeWith}
+              </p>
+            </div>
+          </footer>
         </Suspense>
       </main>
-
-      <footer className="border-t border-border">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center">
-          <p className="text-muted-foreground text-sm">
-            © {new Date().getFullYear()} {data.profile.name} · {t.madeWith}
-          </p>
-        </div>
-      </footer>
 
       <BackToTop />
     </div>
