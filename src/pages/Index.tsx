@@ -33,9 +33,21 @@ const Index = () => {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
-  // Render langsung dengan defaultData supaya hero (elemen LCP) tampil seketika
-  // tanpa menunggu API — foto sudah di-preload di index.html.
   const data = useMemo(() => translateData(rawData || defaultData, lang), [rawData, lang]);
+
+  // Gate SELURUH halaman di belakang kesiapan data, supaya transisi loading -> selesai
+  // adalah SATU swap utuh (bukan hero duluan lalu section+footer menyusul belakangan).
+  // Render sebagian (hero instan, section menyusul) terbukti memicu CLS besar karena
+  // puluhan elemen (section + gambar) tiba-tiba disisipkan sekaligus pertengahan.
+  // Arsitektur "semua sekaligus" ini yang sebelumnya terbukti CLS 0 / skor 87 mobile.
+  if (!rawData) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4">
+        <div className="w-10 h-10 rounded-full border-[3px] border-muted border-t-primary animate-spin" />
+        <p className="text-muted-foreground text-sm">Memuat...</p>
+      </div>
+    );
+  }
 
   const sectionsMap: Record<string, JSX.Element> = {
     about: <AboutSection data={data} key="about" />,
@@ -144,29 +156,22 @@ const Index = () => {
       
       <main>
         <HeroSection data={data} />
-        {rawData && (
-          <Suspense fallback={null}>
-            <AboutSection data={data} />
-            {sectionOrder.map((key) => sectionsMap[key] || null)}
-            <ContactSection />
-          </Suspense>
-        )}
+        <Suspense fallback={null}>
+          <AboutSection data={data} />
+          {sectionOrder.map((key) => sectionsMap[key] || null)}
+          <ContactSection />
+        </Suspense>
       </main>
 
-      {/* Footer & tombol scroll muncul saat data konten siap. */}
-      {rawData && (
-        <>
-          <footer className="border-t border-border">
-            <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center">
-              <p className="text-muted-foreground text-sm">
-                © {new Date().getFullYear()} {data.profile.name} · {t.madeWith}
-              </p>
-            </div>
-          </footer>
+      <footer className="border-t border-border">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center">
+          <p className="text-muted-foreground text-sm">
+            © {new Date().getFullYear()} {data.profile.name} · {t.madeWith}
+          </p>
+        </div>
+      </footer>
 
-          <BackToTop />
-        </>
-      )}
+      <BackToTop />
     </div>
   );
 };
