@@ -1,0 +1,19 @@
+# Bangkit Akhtar Fahd
+
+> Portfolio profesional Bangkit Akhtar Fahd, mahasiswa Computer Science di BINUS University yang berfokus pada Full-Stack Web Development dan Digital Transformation.
+
+Bangkit Akhtar Fahd adalah mahasiswa S1 Computer Science di BINUS University dengan penjurusan Digital Transformation. Situs ini adalah portofolio pribadi yang berisi profil, pengalaman organisasi, pendidikan, sertifikasi, pelatihan, proyek, kegiatan sukarela, penghargaan, dan keahlian teknis.
+
+## Halaman
+
+- [Beranda](https://bangkitakhtar.com/): Profil singkat dan ringkasan seluruh portofolio
+- [Tentang](https://bangkitakhtar.com/#about): Ringkasan profil dan latar belakang
+- [Pengalaman](https://bangkitakhtar.com/#experience): Riwayat organisasi dan pengalaman kerja
+- [Pendidikan](https://bangkitakhtar.com/#education): Riwayat pendidikan formal
+- [Proyek](https://bangkitakhtar.com/#projects): Daftar proyek yang pernah dikerjakan
+- [Keahlian](https://bangkitakhtar.com/#skills): Daftar kemampuan teknis dan non-teknis
+- [Kontak](https://bangkitakhtar.com/#contact): Cara menghubungi
+
+## Tautan Eksternal
+
+- [LinkedIn](https://www.linkedin.com/in/bangkit-akhtar-fahd-a8296b287/): Profil profesional LinkedIn
