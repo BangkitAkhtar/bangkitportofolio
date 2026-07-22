@@ -1123,11 +1123,11 @@ export default function AdminDashboard() {
           const imageUrl = await uploadFile(file);
           callback(imageUrl);
           toast({ title: "File berhasil diupload!" });
-        } catch (error) {
+        } catch (error: any) {
           console.error("Upload failed:", error);
           toast({
-            title: "Upload failed",
-            description: "Please check Laravel backend.",
+            title: "Upload gagal",
+            description: error?.message || "Tidak bisa menghubungi server.",
             variant: "destructive",
           });
         }
@@ -1207,11 +1207,11 @@ export default function AdminDashboard() {
           );
           onUpdate([...images, ...uploadedUrls]);
           toast({ title: "Galeri berhasil diupload!" });
-        } catch (error) {
+        } catch (error: any) {
           console.error("Gallery upload failed:", error);
           toast({
-            title: "Upload failed",
-            description: "Please check Laravel backend.",
+            title: "Upload gagal",
+            description: error?.message || "Tidak bisa menghubungi server.",
             variant: "destructive",
           });
         }
