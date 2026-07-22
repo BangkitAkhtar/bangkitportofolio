@@ -1,7 +1,8 @@
 import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence, PanInfo } from "framer-motion";
-import { X, ChevronLeft, ChevronRight, FileText, ExternalLink } from "lucide-react";
-import { isPdf, pdfThumbUrl, fileNameFromUrl } from "@/lib/fileType";
+import { X, ChevronLeft, ChevronRight, ExternalLink } from "lucide-react";
+import { isPdf, fileNameFromUrl } from "@/lib/fileType";
+import { PdfPreview } from "@/components/PdfPreview";
 
 interface DetailDialogProps {
   open: boolean;
@@ -34,8 +35,6 @@ export function DetailDialog({
   children,
 }: DetailDialogProps) {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
-  // URL thumbnail PDF yang gagal dimuat (server tanpa Imagick) -> pakai viewer browser
-  const [thumbFailed, setThumbFailed] = useState<Record<string, boolean>>({});
 
   // Efek untuk mengunci scroll background dan mereset lightbox
   useEffect(() => {
@@ -146,38 +145,7 @@ export function DetailDialog({
                             onClick={() => setLightboxIndex(i)}
                           >
                             {isPdf(img) ? (
-                              thumbFailed[img] ? (
-                                // Server tidak bisa bikin thumbnail -> render halaman 1 pakai
-                                // viewer bawaan browser. pointer-events-none supaya klik
-                                // tetap diterima kartunya (buka lightbox), bukan iframe-nya.
-                                <>
-                                  <iframe
-                                    src={`${img}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`}
-                                    title={`${title} - dokumen ${i + 1}`}
-                                    className="w-full h-full pointer-events-none border-0 bg-white"
-                                    loading="lazy"
-                                  />
-                                  <span className="absolute bottom-1 left-1 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-black/70 text-white text-[10px] font-medium">
-                                    <FileText className="w-3 h-3" /> PDF
-                                  </span>
-                                </>
-                              ) : (
-                                <>
-                                  <img
-                                    src={pdfThumbUrl(img)}
-                                    alt={`${title} - dokumen ${i + 1}`}
-                                    className="w-full h-full object-cover select-none pointer-events-none bg-white"
-                                    draggable={false}
-                                    loading="lazy"
-                                    onError={() =>
-                                      setThumbFailed((prev) => ({ ...prev, [img]: true }))
-                                    }
-                                  />
-                                  <span className="absolute bottom-1 left-1 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-black/70 text-white text-[10px] font-medium">
-                                    <FileText className="w-3 h-3" /> PDF
-                                  </span>
-                                </>
-                              )
+                              <PdfPreview url={img} className="w-full h-full" />
                             ) : (
                               <img
                                 src={img}

@@ -52,6 +52,7 @@ import {
   FileText,
 } from "lucide-react";
 import { isPdf } from "@/lib/fileType";
+import { PdfPreview } from "@/components/PdfPreview";
 import { changePassword, isSessionValid, clearSession } from "@/lib/adminAuth";
 import { useTheme } from "next-themes";
 
@@ -1235,14 +1236,13 @@ export default function AdminDashboard() {
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-2">
           {images.map((img, i) => (
             <div key={i} className="border rounded-xl overflow-hidden bg-card">
-              {isPdf(img) ? (
-                <div className="w-full h-24 flex flex-col items-center justify-center gap-1 bg-secondary/40 text-muted-foreground">
-                  <FileText className="w-6 h-6" />
-                  <span className="text-[10px] font-medium">PDF</span>
-                </div>
-              ) : (
-                <img loading="lazy" src={getImageUrl(img)} alt="" className="w-full h-24 object-cover" />
-              )}
+              <div className="relative w-full h-24">
+                {isPdf(img) ? (
+                  <PdfPreview url={getImageUrl(img)} className="w-full h-24" />
+                ) : (
+                  <img loading="lazy" src={getImageUrl(img)} alt="" className="w-full h-24 object-cover" />
+                )}
+              </div>
               <div className="p-2 flex items-center justify-between gap-2">
                 <button
                   type="button"
