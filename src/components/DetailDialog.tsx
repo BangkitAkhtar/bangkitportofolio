@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence, PanInfo } from "framer-motion";
 import { X, ChevronLeft, ChevronRight, ExternalLink } from "lucide-react";
-import { isPdf, fileNameFromUrl } from "@/lib/fileType";
+import { isPdf, fileNameFromUrl, prefersNativePdfViewer, openPdfInNewTab } from "@/lib/fileType";
 import { PdfPreview } from "@/components/PdfPreview";
 
 interface DetailDialogProps {
@@ -142,7 +142,15 @@ export function DetailDialog({
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
                             className="relative aspect-video rounded-xl overflow-hidden cursor-pointer border bg-secondary/30 shadow-sm"
-                            onClick={() => setLightboxIndex(i)}
+                            onClick={() => {
+                              // Di HP/tablet, lightbox cuma menampilkan render halaman 1 yang
+                              // buram saat diperbesar. Serahkan ke viewer PDF bawaan perangkat.
+                              if (isPdf(img) && prefersNativePdfViewer()) {
+                                openPdfInNewTab(img);
+                                return;
+                              }
+                              setLightboxIndex(i);
+                            }}
                           >
                             {isPdf(img) ? (
                               <PdfPreview url={img} className="w-full h-full" />

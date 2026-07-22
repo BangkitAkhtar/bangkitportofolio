@@ -1,6 +1,8 @@
 import { useState, lazy, Suspense } from "react";
 import { Briefcase, Building2, ImageIcon } from "lucide-react";
 import { AnimatedSection, StaggerContainer, StaggerItem } from "./AnimatedSection";
+import { PdfPreview } from "./PdfPreview";
+import { isPdf, prefersNativePdfViewer, openPdfInNewTab } from "@/lib/fileType";
 const Lightbox = lazy(() => import("./Lightbox").then((m) => ({ default: m.Lightbox })));
 import { PortfolioData } from "@/lib/data";
 import { useLang } from "@/lib/i18n";
@@ -112,8 +114,23 @@ export function ExperienceSection({ data }: { data: PortfolioData }) {
                               <div className="flex gap-2 flex-wrap">
                                 {images.slice(0, 5).map((img, j) => (
                                   img ? (
-                                    <button key={j} onClick={() => setLightbox({ images: images, index: j })} className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden border border-border group cursor-pointer hover:scale-105 hover:-translate-y-1 active:scale-95 transition-transform duration-200">
-                                      <img loading="lazy" src={img} alt={`${exp?.title || "Project"} — foto ${j + 1}`} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" />
+                                    <button
+                                      key={j}
+                                      onClick={() => {
+                                        // Di HP, serahkan PDF ke viewer bawaan perangkat
+                                        if (isPdf(img) && prefersNativePdfViewer()) {
+                                          openPdfInNewTab(img);
+                                          return;
+                                        }
+                                        setLightbox({ images: images, index: j });
+                                      }}
+                                      className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden border border-border group cursor-pointer hover:scale-105 hover:-translate-y-1 active:scale-95 transition-transform duration-200"
+                                    >
+                                      {isPdf(img) ? (
+                                        <PdfPreview url={img} className="w-full h-full" />
+                                      ) : (
+                                        <img loading="lazy" src={img} alt={`${exp?.title || "Project"} — foto ${j + 1}`} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" />
+                                      )}
                                       <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/10 transition-colors rounded-xl" />
                                       {j === 4 && images.length > 5 && (
                                         <div className="absolute inset-0 bg-foreground/50 flex items-center justify-center rounded-xl">
