@@ -215,10 +215,11 @@ export function DetailDialog({
             onClick={(e) => e.stopPropagation()} // Mencegah klik di foto tertutup
           >
             {isPdf(images[lightboxIndex]) ? (
-              // PDF dibuka dengan viewer bawaan browser (bisa scroll semua halaman & zoom).
-              // Tidak pakai drag-to-navigate supaya scroll di dalam dokumen tidak terganggu.
-              <div className="w-full h-full flex flex-col gap-3">
-                <div className="flex items-center justify-between gap-3 shrink-0">
+              // Tampilkan halaman pertama sebagai gambar (jalan di semua perangkat),
+              // lalu arahkan ke viewer PDF asli lewat tombol. <iframe> sengaja dihindari
+              // karena browser Android/iOS tidak merender PDF di dalamnya -> layar kosong.
+              <div className="w-full h-full flex flex-col gap-3 items-center justify-center">
+                <div className="flex items-center justify-between gap-3 shrink-0 w-full max-w-3xl">
                   <p className="text-white/80 text-sm font-medium truncate">
                     {fileNameFromUrl(images[lightboxIndex])}
                   </p>
@@ -231,12 +232,14 @@ export function DetailDialog({
                     <ExternalLink className="w-4 h-4" /> Buka / Unduh
                   </a>
                 </div>
-                <iframe
-                  key={lightboxIndex}
-                  src={images[lightboxIndex]}
-                  title={`${title} - dokumen ${lightboxIndex + 1}`}
-                  className="w-full flex-1 rounded-lg bg-white border-0 shadow-2xl"
-                />
+                <div className="relative max-w-3xl w-full flex-1 min-h-0 rounded-lg overflow-hidden shadow-2xl">
+                  <PdfPreview
+                    key={lightboxIndex}
+                    url={images[lightboxIndex]}
+                    className="w-full h-full"
+                    showBadge={false}
+                  />
+                </div>
               </div>
             ) : (
               <motion.img

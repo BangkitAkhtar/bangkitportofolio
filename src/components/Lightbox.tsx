@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence, PanInfo } from "framer-motion";
 import { X, ChevronLeft, ChevronRight, FileText, ExternalLink } from "lucide-react";
-import { isPdf, pdfThumbUrl, fileNameFromUrl } from "@/lib/fileType";
+import { isPdf, fileNameFromUrl } from "@/lib/fileType";
+import { PdfPreview } from "@/components/PdfPreview";
 
 interface LightboxProps {
   images: string[];
@@ -106,12 +107,10 @@ export function Lightbox({ images, initialIndex, onClose }: LightboxProps) {
                 <ExternalLink className="w-4 h-4" /> Buka / Unduh
               </a>
             </div>
-            <iframe
-              key={index}
-              src={images[index]}
-              title={fileNameFromUrl(images[index])}
-              className="w-full flex-1 rounded-2xl bg-white border-0 shadow-2xl"
-            />
+            {/* Bukan <iframe>: browser HP tidak merender PDF di dalam iframe */}
+            <div className="relative w-full flex-1 min-h-0 rounded-2xl overflow-hidden shadow-2xl">
+              <PdfPreview key={index} url={images[index]} className="w-full h-full" showBadge={false} />
+            </div>
           </div>
         ) : (
           /* Image with swipe support */
