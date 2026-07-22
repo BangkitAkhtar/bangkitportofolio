@@ -49,7 +49,9 @@ import {
   List,
   ListOrdered,
   BookOpen,
+  FileText,
 } from "lucide-react";
+import { isPdf } from "@/lib/fileType";
 import { changePassword, isSessionValid, clearSession } from "@/lib/adminAuth";
 import { useTheme } from "next-themes";
 
@@ -1112,7 +1114,7 @@ export default function AdminDashboard() {
   const handleFileUpload = async (callback: (imageUrl: string) => void) => {
     const input = document.createElement("input");
     input.type = "file";
-    input.accept = "image/*";
+    input.accept = "image/*,application/pdf";
 
     input.onchange = async (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
@@ -1120,7 +1122,7 @@ export default function AdminDashboard() {
         try {
           const imageUrl = await uploadFile(file);
           callback(imageUrl);
-          toast({ title: "Image uploaded successfully!" });
+          toast({ title: "File berhasil diupload!" });
         } catch (error) {
           console.error("Upload failed:", error);
           toast({
@@ -1158,12 +1160,17 @@ export default function AdminDashboard() {
         </button>
         {currentImage && (
           <>
-            {/* 👇 PERUBAHAN: Gunakan fungsi Helper untuk memastikan gambar di cPanel tampil */}
-            <img loading="lazy"
-              src={getImageUrl(currentImage)}
-              alt=""
-              className="w-10 h-10 rounded-lg object-cover border"
-            />
+            {isPdf(currentImage) ? (
+              <span className="w-10 h-10 rounded-lg border flex items-center justify-center bg-secondary/40 text-muted-foreground">
+                <FileText className="w-4 h-4" />
+              </span>
+            ) : (
+              <img loading="lazy"
+                src={getImageUrl(currentImage)}
+                alt=""
+                className="w-10 h-10 rounded-lg object-cover border"
+              />
+            )}
             <button
               type="button"
               onClick={onClear}
@@ -1187,7 +1194,7 @@ export default function AdminDashboard() {
     const handleMultiUpload = async () => {
       const input = document.createElement("input");
       input.type = "file";
-      input.accept = "image/*";
+      input.accept = "image/*,application/pdf";
       input.multiple = true;
 
       input.onchange = async (e) => {
@@ -1199,7 +1206,7 @@ export default function AdminDashboard() {
             Array.from(files).map((file) => uploadFile(file))
           );
           onUpdate([...images, ...uploadedUrls]);
-          toast({ title: "Gallery uploaded successfully!" });
+          toast({ title: "Galeri berhasil diupload!" });
         } catch (error) {
           console.error("Gallery upload failed:", error);
           toast({
@@ -1228,8 +1235,14 @@ export default function AdminDashboard() {
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-2">
           {images.map((img, i) => (
             <div key={i} className="border rounded-xl overflow-hidden bg-card">
-              {/* 👇 PERUBAHAN: Sama di sini juga */}
-              <img loading="lazy" src={getImageUrl(img)} alt="" className="w-full h-24 object-cover" />
+              {isPdf(img) ? (
+                <div className="w-full h-24 flex flex-col items-center justify-center gap-1 bg-secondary/40 text-muted-foreground">
+                  <FileText className="w-6 h-6" />
+                  <span className="text-[10px] font-medium">PDF</span>
+                </div>
+              ) : (
+                <img loading="lazy" src={getImageUrl(img)} alt="" className="w-full h-24 object-cover" />
+              )}
               <div className="p-2 flex items-center justify-between gap-2">
                 <button
                   type="button"

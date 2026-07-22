@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence, PanInfo } from "framer-motion";
-import { X, ChevronLeft, ChevronRight } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, FileText, ExternalLink } from "lucide-react";
+import { isPdf, pdfThumbUrl, fileNameFromUrl } from "@/lib/fileType";
 
 interface DetailDialogProps {
   open: boolean;
@@ -33,6 +34,8 @@ export function DetailDialog({
   children,
 }: DetailDialogProps) {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  // URL thumbnail PDF yang gagal dimuat (server tanpa Imagick) -> pakai viewer browser
+  const [thumbFailed, setThumbFailed] = useState<Record<string, boolean>>({});
 
   // Efek untuk mengunci scroll background dan mereset lightbox
   useEffect(() => {
@@ -142,13 +145,48 @@ export function DetailDialog({
                             className="relative aspect-video rounded-xl overflow-hidden cursor-pointer border bg-secondary/30 shadow-sm"
                             onClick={() => setLightboxIndex(i)}
                           >
-                            <img
-                              src={img}
-                              alt={`${title} - gambar ${i + 1}`}
-                              className="w-full h-full object-cover select-none pointer-events-none"
-                              draggable={false}
-                              loading="lazy"
-                            />
+                            {isPdf(img) ? (
+                              thumbFailed[img] ? (
+                                // Server tidak bisa bikin thumbnail -> render halaman 1 pakai
+                                // viewer bawaan browser. pointer-events-none supaya klik
+                                // tetap diterima kartunya (buka lightbox), bukan iframe-nya.
+                                <>
+                                  <iframe
+                                    src={`${img}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`}
+                                    title={`${title} - dokumen ${i + 1}`}
+                                    className="w-full h-full pointer-events-none border-0 bg-white"
+                                    loading="lazy"
+                                  />
+                                  <span className="absolute bottom-1 left-1 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-black/70 text-white text-[10px] font-medium">
+                                    <FileText className="w-3 h-3" /> PDF
+                                  </span>
+                                </>
+                              ) : (
+                                <>
+                                  <img
+                                    src={pdfThumbUrl(img)}
+                                    alt={`${title} - dokumen ${i + 1}`}
+                                    className="w-full h-full object-cover select-none pointer-events-none bg-white"
+                                    draggable={false}
+                                    loading="lazy"
+                                    onError={() =>
+                                      setThumbFailed((prev) => ({ ...prev, [img]: true }))
+                                    }
+                                  />
+                                  <span className="absolute bottom-1 left-1 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-black/70 text-white text-[10px] font-medium">
+                                    <FileText className="w-3 h-3" /> PDF
+                                  </span>
+                                </>
+                              )
+                            ) : (
+                              <img
+                                src={img}
+                                alt={`${title} - gambar ${i + 1}`}
+                                className="w-full h-full object-cover select-none pointer-events-none"
+                                draggable={false}
+                                loading="lazy"
+                              />
+                            )}
                           </motion.div>
                         ))}
                       </div>
@@ -208,20 +246,46 @@ export function DetailDialog({
             className="relative z-10 w-full h-full flex items-center justify-center p-4 overflow-hidden"
             onClick={(e) => e.stopPropagation()} // Mencegah klik di foto tertutup
           >
-            <motion.img
-              key={lightboxIndex}
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.2 }}
-              src={images[lightboxIndex]}
-              alt={`${title} - gambar ${lightboxIndex + 1}`}
-              drag={images.length > 1 ? "x" : false}
-              dragConstraints={{ left: 0, right: 0 }}
-              dragElastic={0.3}
-              onDragEnd={handleDragEnd}
-              className="max-w-full max-h-[85vh] object-contain rounded-lg select-none cursor-grab active:cursor-grabbing shadow-2xl"
-              draggable={false}
-            />
+            {isPdf(images[lightboxIndex]) ? (
+              // PDF dibuka dengan viewer bawaan browser (bisa scroll semua halaman & zoom).
+              // Tidak pakai drag-to-navigate supaya scroll di dalam dokumen tidak terganggu.
+              <div className="w-full h-full flex flex-col gap-3">
+                <div className="flex items-center justify-between gap-3 shrink-0">
+                  <p className="text-white/80 text-sm font-medium truncate">
+                    {fileNameFromUrl(images[lightboxIndex])}
+                  </p>
+                  <a
+                    href={images[lightboxIndex]}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/10 backdrop-blur-md text-white text-sm font-medium hover:bg-white/20 transition-colors shrink-0"
+                  >
+                    <ExternalLink className="w-4 h-4" /> Buka / Unduh
+                  </a>
+                </div>
+                <iframe
+                  key={lightboxIndex}
+                  src={images[lightboxIndex]}
+                  title={`${title} - dokumen ${lightboxIndex + 1}`}
+                  className="w-full flex-1 rounded-lg bg-white border-0 shadow-2xl"
+                />
+              </div>
+            ) : (
+              <motion.img
+                key={lightboxIndex}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.2 }}
+                src={images[lightboxIndex]}
+                alt={`${title} - gambar ${lightboxIndex + 1}`}
+                drag={images.length > 1 ? "x" : false}
+                dragConstraints={{ left: 0, right: 0 }}
+                dragElastic={0.3}
+                onDragEnd={handleDragEnd}
+                className="max-w-full max-h-[85vh] object-contain rounded-lg select-none cursor-grab active:cursor-grabbing shadow-2xl"
+                draggable={false}
+              />
+            )}
           </div>
 
           {/* Tombol Kontrol Mobile */}

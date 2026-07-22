@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence, PanInfo } from "framer-motion";
-import { X, ChevronLeft, ChevronRight } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, FileText, ExternalLink } from "lucide-react";
+import { isPdf, pdfThumbUrl, fileNameFromUrl } from "@/lib/fileType";
 
 interface LightboxProps {
   images: string[];
@@ -86,26 +87,54 @@ export function Lightbox({ images, initialIndex, onClose }: LightboxProps) {
           </>
         )}
 
-        {/* Image with swipe support */}
-        <motion.div
-          key={index}
-          initial={{ opacity: 0, scale: 0.85 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.85 }}
-          transition={{ type: "spring", stiffness: 300, damping: 25 }}
-          drag={images.length > 1 ? "x" : false}
-          dragConstraints={{ left: 0, right: 0 }}
-          dragElastic={0.3}
-          onDragEnd={handleDragEnd}
-          className="relative z-10 max-w-[90vw] max-h-[70vh] sm:max-h-[85vh]"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <img loading="lazy"
-            src={images[index]}
-            alt=""
-            className="max-w-full max-h-[70vh] sm:max-h-[85vh] rounded-2xl shadow-2xl object-contain pointer-events-none"
-          />
-        </motion.div>
+        {/* PDF: pakai viewer bawaan browser (tanpa drag, supaya scroll dokumen tetap enak) */}
+        {isPdf(images[index]) ? (
+          <div
+            className="relative z-10 w-[92vw] max-w-4xl h-[70vh] sm:h-[85vh] flex flex-col gap-3"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between gap-3 shrink-0">
+              <p className="text-white/80 text-sm font-medium truncate">
+                {fileNameFromUrl(images[index])}
+              </p>
+              <a
+                href={images[index]}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/20 backdrop-blur-sm text-white text-sm font-medium hover:bg-white/40 transition-colors shrink-0"
+              >
+                <ExternalLink className="w-4 h-4" /> Buka / Unduh
+              </a>
+            </div>
+            <iframe
+              key={index}
+              src={images[index]}
+              title={fileNameFromUrl(images[index])}
+              className="w-full flex-1 rounded-2xl bg-white border-0 shadow-2xl"
+            />
+          </div>
+        ) : (
+          /* Image with swipe support */
+          <motion.div
+            key={index}
+            initial={{ opacity: 0, scale: 0.85 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.85 }}
+            transition={{ type: "spring", stiffness: 300, damping: 25 }}
+            drag={images.length > 1 ? "x" : false}
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={0.3}
+            onDragEnd={handleDragEnd}
+            className="relative z-10 max-w-[90vw] max-h-[70vh] sm:max-h-[85vh]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <img loading="lazy"
+              src={images[index]}
+              alt=""
+              className="max-w-full max-h-[70vh] sm:max-h-[85vh] rounded-2xl shadow-2xl object-contain pointer-events-none"
+            />
+          </motion.div>
+        )}
 
         {/* Mobile Nav arrows - below image */}
         {images.length > 1 && (
@@ -147,7 +176,13 @@ export function Lightbox({ images, initialIndex, onClose }: LightboxProps) {
                   i === index ? "border-white scale-110" : "border-transparent opacity-60 hover:opacity-100"
                 }`}
               >
-                <img loading="lazy" src={img} alt="" className="w-full h-full object-cover" />
+                {isPdf(img) ? (
+                  <span className="w-full h-full flex items-center justify-center bg-white/90 text-neutral-700">
+                    <FileText className="w-5 h-5" />
+                  </span>
+                ) : (
+                  <img loading="lazy" src={img} alt="" className="w-full h-full object-cover" />
+                )}
               </button>
             ))}
           </motion.div>
