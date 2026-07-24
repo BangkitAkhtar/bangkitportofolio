@@ -3,6 +3,7 @@ import { Briefcase, Building2, ImageIcon } from "lucide-react";
 import { AnimatedSection, StaggerContainer, StaggerItem } from "./AnimatedSection";
 import { PdfPreview } from "./PdfPreview";
 import { isPdf, prefersNativePdfViewer, openPdfInNewTab } from "@/lib/fileType";
+import { formatInline } from "@/lib/markdown";
 const Lightbox = lazy(() => import("./Lightbox").then((m) => ({ default: m.Lightbox })));
 import { PortfolioData } from "@/lib/data";
 import { useLang } from "@/lib/i18n";
@@ -76,18 +77,21 @@ export function ExperienceSection({ data }: { data: PortfolioData }) {
                                       <span className="mt-[6px] text-primary text-base font-semibold leading-none flex-shrink-0">
                                         •
                                       </span>
-                                      <p className="text-muted-foreground text-sm leading-relaxed">
-                                        {cleaned}
-                                      </p>
+                                      <p
+                                        className="text-muted-foreground text-sm leading-relaxed"
+                                        dangerouslySetInnerHTML={{ __html: formatInline(cleaned) }}
+                                      />
                                     </div>
                                   );
                                 }
 
                                 // normal text (no bullet)
                                 return (
-                                  <p key={j} className="text-muted-foreground text-sm leading-relaxed">
-                                    {cleaned}
-                                  </p>
+                                  <p
+                                    key={j}
+                                    className="text-muted-foreground text-sm leading-relaxed"
+                                    dangerouslySetInnerHTML={{ __html: formatInline(cleaned) }}
+                                  />
                                 );
                               })}
                             </div>

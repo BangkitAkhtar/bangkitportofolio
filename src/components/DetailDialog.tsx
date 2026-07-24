@@ -3,6 +3,7 @@ import { motion, AnimatePresence, PanInfo } from "framer-motion";
 import { X, ChevronLeft, ChevronRight, ExternalLink } from "lucide-react";
 import { isPdf, fileNameFromUrl, prefersNativePdfViewer, openPdfInNewTab } from "@/lib/fileType";
 import { PdfPreview } from "@/components/PdfPreview";
+import { markdownToHtml } from "@/lib/markdown";
 
 interface DetailDialogProps {
   open: boolean;
@@ -17,10 +18,12 @@ interface DetailDialogProps {
 function renderRichText(text?: string) {
   if (!text) return null;
 
+  // Deskripsi disimpan sebagai markdown mentah (dari toolbar Bold/Italic/List di admin
+  // dashboard) — harus dikonversi ke HTML dulu, bukan didorong langsung apa adanya.
   return (
     <div
       className="text-muted-foreground text-sm leading-relaxed prose prose-sm max-w-none dark:prose-invert prose-p:my-2 prose-ul:my-2 prose-ol:my-2 prose-li:my-1"
-      dangerouslySetInnerHTML={{ __html: text }}
+      dangerouslySetInnerHTML={{ __html: markdownToHtml(text) }}
     />
   );
 }
